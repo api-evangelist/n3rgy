@@ -1,0 +1,79 @@
+generated: '2026-07-27'
+method: derived
+source: >-
+  Derived by binding every candidate MCP tool in mcp/n3rgy-mcp.yml to its backing
+  operationId in openapi/n3rgy-customer-service-api-v2-openapi.yaml. Every
+  operationId below was verified verbatim in the spec.
+purpose: >-
+  Make the agent-facing tool a first-class discovery unit bound to the
+  machine-readable contract, so each tool inherits a REAL inputSchema (the
+  operation's parameters + requestBody) instead of a guessed one.
+surfaces:
+  rest_openapi: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+  rest_operations: 26
+  rest_servers:
+    - {url: 'https://api-v2.data.n3rgy.com', role: live, anonymous_status: 403}
+    - {url: 'https://api-v2-sandbox.data.n3rgy.com', role: sandbox, anonymous_status: 403}
+  graphql: null
+  graphql_note: n3rgy exposes no GraphQL surface.
+  mcp: null
+  mcp_note: >-
+    No provider-operated MCP server exists (probed /mcp and the OAuth well-knowns
+    on the API host — 404). The tool list is a candidate derived from the OpenAPI,
+    so this crosswalk is a 1:1 projection with no surface divergence to record.
+divergence: none
+divergence_note: >-
+  Because both surfaces are projections of the SAME OpenAPI, there are no
+  MCP-only or REST-only capabilities. This crosswalk becomes interesting the day
+  n3rgy ships a real MCP server; until then it is the binding map an implementer
+  should build against.
+
+crosswalk:
+  - {tool: list_consented_mpxns, category: consent-discovery, rest: [RetrieveConsentedMPxNs], binding: rest, confidence: high}
+  - {tool: list_utilities_for_mpxn, category: consent-discovery, rest: [RetrieveConsentedMPxNUtilities], binding: rest, confidence: high}
+  - {tool: list_reading_types, category: consent-discovery, rest: [RetrieveDataTypesForUtility], binding: rest, confidence: high}
+  - {tool: find_mpxn, category: property-lookup, rest: [RetrieveMPxNAvailability], binding: rest, confidence: high}
+  - {tool: find_mpxn_by_address, category: property-lookup, rest: [mpxnFromAddress], binding: rest, confidence: high}
+  - {tool: get_reading_data, category: readings, rest: [RetrieveDataForReadingType], binding: rest, confidence: high}
+  - {tool: update_now, category: readings, rest: [generateFetchNowRequest], binding: rest, confidence: high, note: quota-consuming — decrements a per-combination daily counter}
+  - {tool: get_update_frequencies, category: frequency-control, rest: [RetrieveDataUpdateFrequencies], binding: rest, confidence: high}
+  - {tool: set_meter_update_frequency, category: frequency-control, rest: [SetMeterUpdateFrequency], binding: rest, confidence: high}
+  - {tool: set_defaults, category: frequency-control, rest: [SetDefaults], binding: rest, confidence: high, note: account-scoped defaults}
+  - {tool: reset_all_update_frequencies, category: frequency-control, rest: [ResetAllUpdateFrequencies], binding: rest, confidence: high, note: estate-wide — applies to every consented HAN}
+  - {tool: read_inventory, category: estate-health, rest: [ReadInventory], binding: rest, confidence: high, note: asynchronous; returns a result URI, payload fetched separately}
+  - {tool: create_export_profiles, category: estate-health, rest: [CreateExportProfiles], binding: rest, confidence: high, note: targets the retired V1 solution}
+  - {tool: add_device, category: third-party-devices, rest: [addDevice], binding: rest, confidence: high}
+  - {tool: list_devices, category: third-party-devices, rest: [listDevices], binding: rest, confidence: high}
+  - {tool: get_device, category: third-party-devices, rest: [getDevice], binding: rest, confidence: high}
+  - {tool: update_device, category: third-party-devices, rest: [updateDevice], binding: rest, confidence: high}
+  - {tool: delete_device, category: third-party-devices, rest: [deleteDevice], binding: rest, confidence: high, note: destructive}
+  - {tool: upload_device_data, category: third-party-devices, rest: [uploadData], binding: rest, confidence: high}
+  - {tool: delete_device_data, category: third-party-devices, rest: [deleteData], binding: rest, confidence: high, note: destructive}
+  - {tool: get_push_configuration, category: events, rest: [GetPushNotificationConfiguration], binding: rest, confidence: high}
+  - {tool: set_push_configuration, category: events, rest: [EditPushNotificationConfiguration], binding: rest, confidence: high, note: replaces ALL existing configuration}
+  - {tool: delete_push_configuration, category: events, rest: [DeletePushNotificationConfiguration], binding: rest, confidence: high, note: destructive}
+  - {tool: get_push_status, category: events, rest: [RetrievePushNotificationStatus], binding: rest, confidence: high}
+  - {tool: get_property_elements, category: internal, rest: [RetrievePropertyElements], binding: rest, confidence: high, note: undocumented internal endpoint}
+  - {tool: get_reading_type_data, category: internal, rest: [RetrieveReadingTypeData], binding: rest, confidence: high, note: the only operation declaring an empty security array}
+
+mcp_only: []
+rest_only: []
+
+coverage:
+  tools_named: 26
+  tools_bound: 26
+  mcp_only: 0
+  rest_operations_total: 26
+  rest_operations_with_a_tool: 26
+  binding_completeness: 1.0
+
+authorization_model:
+  layer_1: x-api-key header, enabled per-environment by the n3rgy back office
+  layer_2: >-
+    active end-customer consent for the HAN behind the supplied MPxN — required
+    by list_utilities_for_mpxn, list_reading_types, get_reading_data,
+    get_update_frequencies, update_now and set_meter_update_frequency
+  layer_3: >-
+    frequency-change permission on the customer account — required by
+    set_meter_update_frequency, set_defaults and reset_all_update_frequencies
+  detail: authentication/n3rgy-authentication.yml

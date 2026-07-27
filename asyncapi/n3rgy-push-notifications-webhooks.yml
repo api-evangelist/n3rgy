@@ -1,0 +1,130 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  https://customer-api-user-manuals.data.n3rgy.com/requests/ (Push Notification
+  section) and openapi/n3rgy-customer-service-api-v2-openapi.yaml
+  (/push/configuration, /push/status).
+spec_type: none
+asyncapi_published: false
+description: >-
+  n3rgy DOES operate an event/push surface — "Push Notification" — but publishes
+  no AsyncAPI document for it. Instead of polling the reading endpoints, a
+  customer registers a single HTTPS endpoint (`uri`) and a per-device-type
+  subscription list, and n3rgy pushes to that endpoint when new readings arrive
+  for the subscribed utility/reading-type combinations. The configuration and the
+  delivery status are both managed through the REST contract, which is what makes
+  the surface machine-discoverable at all. What n3rgy does NOT publish is the
+  PAYLOAD SCHEMA of the pushed message, nor a signing/verification scheme, nor a
+  retry policy — so no AsyncAPI document has been generated here; fabricating one
+  would invent a message contract that does not exist. The delivery-status
+  endpoint (GET /push/status) is the only feedback channel, returning the last
+  HTTP status and response body n3rgy saw from the subscriber.
+
+subscription_model:
+  style: single global endpoint per customer, subscribed by device type + utility type
+  registration: POST /push/configuration
+  endpoint_field: uri
+  scope: customer account (one URI for the whole account, not per property)
+  device_types:
+    - name: esme
+      label: Electricity Smart Metering Equipment
+      utility_types: [IMPORT, EXPORT, TARIFF]
+    - name: gsme
+      label: Gas Smart Metering Equipment
+      utility_types: [IMPORT, TARIFF]
+  replace_semantics: >-
+    POST /push/configuration REPLACES all existing configuration. Sending an
+    empty body resets both esme and gsme lists. Setting esme or gsme to an empty
+    list removes those configurations. Setting `uri` to empty does NOT remove the
+    registered endpoint.
+  partial_validation: >-
+    "If the entire body is invalid, an error is returned... If only a few entries
+    are invalid, they are highlighted in the response and the process continues to
+    the valid entries."
+
+events:
+  - name: reading available
+    trigger: >-
+      A new reading of a subscribed reading type becomes available for a device
+      type the customer has subscribed. The developer guide documents the
+      SUBSCRIPTION dimensions (device type x utility type) but not a named event
+      catalogue.
+    subscribed_by:
+      - {device_type: esme, utility_type: IMPORT}
+      - {device_type: esme, utility_type: EXPORT}
+      - {device_type: esme, utility_type: TARIFF}
+      - {device_type: gsme, utility_type: IMPORT}
+      - {device_type: gsme, utility_type: TARIFF}
+    payload_schema: not published
+    delivery: HTTP POST to the customer-registered uri
+    signing: not published
+    retry_policy: not published
+
+management_operations:
+  - operationId: GetPushNotificationConfiguration
+    method: GET
+    path: /push/configuration
+    summary: Read the current push configuration
+    response_example: |
+      {
+        "pushNotificationURL": "endpoint.com",
+        "deviceConfigurations": {
+          "ELECTRICITY": ["IMPORT", "TARIFF"]
+        }
+      }
+  - operationId: EditPushNotificationConfiguration
+    method: POST
+    path: /push/configuration
+    summary: Create or replace the push configuration
+    success_status: 204
+    request_example: |
+      {
+        "uri": "www.dummy.url.com",
+        "esme": ["IMPORT", "TARIFF"],
+        "gsme": ["IMPORT"]
+      }
+    schema: PushNotificationBodyRequest
+  - operationId: DeletePushNotificationConfiguration
+    method: DELETE
+    path: /push/configuration
+    summary: Delete the push configuration
+  - operationId: RetrievePushNotificationStatus
+    method: GET
+    path: /push/status
+    summary: Read the outcome of the most recent delivery attempt
+    response_example: |
+      {
+        "lastHttpStatus": "200",
+        "lastResponse": "Response Body obtained if any exists.",
+        "date": "2024-06-02T12:00:00.0000"
+      }
+    errors:
+      - {status: 404, message: No records for push notification status found at this time.}
+
+subscriber_requirements:
+  - Expose a public HTTPS endpoint that accepts POST.
+  - >-
+    Return a 2xx quickly — n3rgy records the last HTTP status and response body
+    and exposes them via GET /push/status; that is the only delivery telemetry.
+  - >-
+    Do not rely on a signature: n3rgy publishes no webhook signing secret or
+    signature header. Treat the pushed payload as untrusted and re-fetch
+    authoritative data with RetrieveDataForReadingType.
+
+gaps:
+  - No AsyncAPI (or any) machine-readable description of the pushed message.
+  - No published payload schema, event name, or event id.
+  - No signing / verification mechanism documented.
+  - No retry, backoff or dead-letter policy documented.
+  - >-
+    One endpoint per customer account — no per-property or per-MPxN routing, so
+    subscribers must fan out themselves.
+
+history:
+  - {version: '1.12', change: Push Notification API specification added to the developer guide}
+  - {version: '1.15', change: Push Notification specification enhanced}
+
+cross_references:
+  openapi: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+  conventions: conventions/n3rgy-conventions.yml
+  errors: errors/n3rgy-problem-types.yml

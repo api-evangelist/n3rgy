@@ -1,0 +1,308 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  https://customer-api-user-manuals.data.n3rgy.com/requests/ — the per-endpoint
+  "Error scenarios" tables, captured verbatim; cross-checked against the 4xx/5xx
+  responses and error schemas in
+  openapi/n3rgy-customer-service-api-v2-openapi.yaml.
+format: proprietary
+rfc9457: false
+description: >-
+  n3rgy does NOT use RFC 9457 problem+json. Errors are returned as
+  application/json with one of two shapes: an `errors[]` array of
+  {code, message} objects (the dominant envelope, schema `ForbiddenResponse`,
+  `BadRequestResponse`, `BadRequestBodyResponse`, `NotFoundPushNotificationResponse`,
+  `ConsentNotFoundResponse`, `NotFoundMpxnResponse`), or a flat single-field
+  `{"message": "..."}` object (schemas `ParamStartAtErrorResponse`,
+  `ParamMaxResultsErrorResponse`, `ParamMPxNErrorResponse`,
+  `MPxNNotAssociatedWithAHANError`, `NotFoundResponse`, `TooManyRequestsResponse`).
+  There are no machine-readable error codes beyond the HTTP status — the `code`
+  field in the envelope repeats the HTTP status, so clients must match on the
+  human-readable `message` string. That is the single biggest agent-readiness
+  weakness in this contract.
+envelopes:
+  - name: errors-array
+    shape: '{"errors": [{"code": <http-status-int>, "message": "<text>"}]}'
+    schemas:
+      - ForbiddenResponse
+      - BadRequestResponse
+      - BadRequestBodyResponse
+      - ConsentNotFoundResponse
+      - NotFoundMpxnResponse
+      - NotFoundPushNotificationResponse
+      - SetMeterUpdateFrequencyForbiddenResponseList
+      - SetMeterUpdateFrequencyBadRequestResponseList
+      - SetMeterUpdateFrequencyNotFoundResponseList
+    example: |
+      {
+        "errors": [
+          {
+            "code": 403,
+            "message": "User is not authorized to access this resource with an explicit deny."
+          }
+        ]
+      }
+  - name: flat-message
+    shape: '{"message": "<text>"}'
+    schemas:
+      - ParamStartAtErrorResponse
+      - ParamMaxResultsErrorResponse
+      - ParamMPxNErrorResponse
+      - MPxNNotAssociatedWithAHANError
+      - NotFoundResponse
+      - TooManyRequestsResponse
+
+problems:
+  # ---- 403 authentication / authorisation ----
+  - status: 403
+    key: invalid-api-key
+    title: Absent or invalid API Key
+    message: User is not authorized to access this resource with an explicit deny.
+    remediation: >-
+      Send a valid key in the x-api-key header. A live key must first be enabled
+      by the n3rgy data back office; a sandbox key must be enabled for the
+      sandbox. See authentication/n3rgy-authentication.yml.
+    applies_to: all operations
+  - status: 403
+    key: consent-not-found
+    title: No active consent for the HAN behind this MPxN
+    message: Consent for the given MPxN not found.
+    remediation: >-
+      The end customer must grant (or re-grant) consent for the property before
+      any consent-bearing operation returns data.
+    applies_to:
+      - RetrieveConsentedMPxNUtilities
+      - RetrieveDataTypesForUtility
+      - RetrieveDataUpdateFrequencies
+      - RetrieveDataForReadingType
+      - generateFetchNowRequest
+  - status: 403
+    key: consent-has-no-update-frequencies
+    title: Consent exists but every update frequency was set to "never"
+    message: Consent for the given MPxN does not have update frequencies set.
+    remediation: >-
+      Call SetMeterUpdateFrequency for the utility / reading type you need; only
+      the relevant frequency has to change.
+    applies_to:
+      - RetrieveConsentedMPxNUtilities
+      - RetrieveDataTypesForUtility
+      - RetrieveDataForReadingType
+  - status: 403
+    key: consent-not-found-for-target-meter
+    title: No active consent for the HAN of the target meter
+    message: Consent for the property of the target meter not found.
+    applies_to: [SetMeterUpdateFrequency]
+  - status: 403
+    key: not-authorized-to-change-frequencies
+    title: Customer is not authorised to change update frequencies
+    message: User is not authorized to access this resource with an explicit deny.
+    remediation: The customer account must be granted frequency-change permission by n3rgy.
+    applies_to: [SetMeterUpdateFrequency, SetDefaults, ResetAllUpdateFrequencies]
+
+  # ---- 400 validation ----
+  - status: 400
+    key: invalid-mpxn
+    title: Absent MPxN, or not 1-13 digits
+    message: An MPxN must be provided, and must be a value between 1 and 13.
+    applies_to:
+      - RetrieveConsentedMPxNUtilities
+      - RetrieveDataTypesForUtility
+      - RetrieveMPxNAvailability
+      - RetrieveDataUpdateFrequencies
+      - RetrieveDataForReadingType
+      - generateFetchNowRequest
+  - status: 400
+    key: invalid-start-at
+    title: startAt is not an integer
+    message: Parameter startAt must be an integer.
+    applies_to: [RetrieveConsentedMPxNs]
+  - status: 400
+    key: invalid-max-results
+    title: maxResults is not an integer
+    message: Parameter maxResults must be an integer.
+    applies_to: [RetrieveConsentedMPxNs]
+  - status: 400
+    key: invalid-utility
+    title: Absent utility, or not electricity/gas
+    message: 'A utility type must be provided and must be one of: electricity, gas.'
+    applies_to: [RetrieveDataForReadingType, generateFetchNowRequest]
+  - status: 400
+    key: invalid-reading-type
+    title: Absent readingType, or not an allowed value
+    message: >-
+      A type of data must be provided and must be one of: import, consumption,
+      export, production, tariff.
+    applies_to: [RetrieveDataForReadingType, generateFetchNowRequest]
+  - status: 400
+    key: invalid-output-format
+    title: outputFormat is not json or csv
+    message: "Parameter 'outputFormat' must be one of: json, csv."
+    applies_to: [RetrieveDataForReadingType]
+  - status: 400
+    key: invalid-update-frequency
+    title: Update-frequency value not in the allowed enum
+    message: >-
+      Parameter "parameter-name" must be one of: NEVER, H_2, H_6, H_12, DAILY,
+      WEEKLY, MONTHLY.
+    note: >-
+      The guide shows two casings in different tables (lower-case never/3h/6h/12h/
+      daily/weekly/monthly on set-meter-update-frequency, upper-case NEVER/H_2/
+      H_6/H_12/DAILY/WEEKLY/MONTHLY on set-defaults and
+      reset-all-update-frequencies). Treat the upper-case enum as canonical for
+      the body of set-defaults / reset-all.
+    applies_to: [SetMeterUpdateFrequency, SetDefaults, ResetAllUpdateFrequencies]
+  - status: 400
+    key: invalid-get-history-data
+    title: getHistoryData is not true/false
+    message: "Parameter 'getHistoryData' must be one of: true, false."
+    applies_to: [SetDefaults]
+  - status: 400
+    key: empty-body
+    title: Empty request body
+    message: At least one body parameter must be provided.
+    applies_to: [SetDefaults, ResetAllUpdateFrequencies]
+  - status: 400
+    key: empty-body-read-inventory
+    title: Empty Read Inventory request body
+    message: The request's body is empty.
+    applies_to: [ReadInventory]
+  - status: 400
+    key: no-inputs
+    title: Read Inventory body present but every element list empty
+    message: There are no inputs on the request.
+    applies_to: [ReadInventory]
+  - status: 400
+    key: missing-device-or-frequency
+    title: deviceID missing, or no update frequency specified
+    message: One device ID and at least one update frequency must be provided.
+    applies_to: [SetMeterUpdateFrequency]
+  - status: 400
+    key: device-not-a-meter
+    title: deviceID does not correspond to a meter
+    message: The specified deviceID does not correspond to a meter.
+    applies_to: [SetMeterUpdateFrequency]
+  - status: 400
+    key: invalid-address-lookup
+    title: Absent/invalid post code or partial address
+    message: >-
+      Valid UK post code and partial address with less than 30 characters must be
+      provided.
+    applies_to: [mpxnFromAddress]
+  - status: 400
+    key: ambiguous-address
+    title: Address does not uniquely identify a premises
+    message: The Request does not uniquely identify a Premises.
+    applies_to: [mpxnFromAddress]
+
+  # ---- 404 not found ----
+  - status: 404
+    key: utility-not-available
+    title: The requested utility is not present in this HAN
+    message: >-
+      There is no available information for the specified utility in the HAN
+      associated with the received MPxN.
+    applies_to: [RetrieveDataTypesForUtility]
+  - status: 404
+    key: device-not-linked-to-premises
+    title: MPxN found but its device is not associated with any premises
+    message: >-
+      The received MPxN is associated with a device that is not associated to any
+      premises.
+    applies_to: [RetrieveMPxNAvailability]
+  - status: 404
+    key: no-meters-for-mpxn
+    title: No record of meters for this MPxN in the SMSOs
+    message: There is no available information of meters associated with the received MPxN.
+    applies_to: [RetrieveMPxNAvailability]
+  - status: 404
+    key: mpxn-lookup-unavailable
+    title: SMSO lookup could not be completed at this time
+    message: >-
+      It was not possible at the time to recover any information of meters
+      associated with the received MPxN.
+    applies_to: [RetrieveMPxNAvailability]
+  - status: 404
+    key: address-device-not-linked
+    title: Address found but device is not associated with any premises
+    message: >-
+      The received post code/partial address is associated with a device that is
+      not associated to any premises.
+    applies_to: [mpxnFromAddress]
+  - status: 404
+    key: no-meters-for-address
+    title: No record of meters for this post code / partial address
+    message: >-
+      There is no available information of meters associated with the received
+      post code and partial address.
+    applies_to: [mpxnFromAddress]
+  - status: 404
+    key: address-lookup-unavailable
+    title: Address SMSO lookup could not be completed at this time
+    message: >-
+      It was not possible at the time to recover any information of meters
+      associated with the received post code and partial address.
+    applies_to: [mpxnFromAddress]
+  - status: 404
+    key: device-id-unknown
+    title: No device with the specified deviceID
+    message: >-
+      There is no available information of meters associated with the given device
+      ID.
+    applies_to: [SetMeterUpdateFrequency]
+  - status: 404
+    key: device-has-no-mpxn-for-frequency-type
+    title: Device has no MPxN matching the requested frequency type
+    message: >-
+      The specified deviceID is not associated with a valid MPxN for the requested
+      update frequency type.
+    applies_to: [SetMeterUpdateFrequency]
+  - status: 404
+    key: no-push-status
+    title: No push-notification delivery record yet
+    message: No records for push notification status found at this time.
+    applies_to: [RetrievePushNotificationStatus]
+
+  # ---- 429 quota ----
+  - status: 429
+    key: read-inventory-items-exceeded
+    title: More than 200 items in one Read Inventory element list
+    message: >-
+      The list of element chosen in request (mpxn/uprn/deviceId) exceeds the
+      maximum items allowed (200).
+    applies_to: [ReadInventory]
+    detail: rate-limits/n3rgy-rate-limits.yml
+  - status: 429
+    key: read-inventory-daily-threshold
+    title: Daily processed-entries threshold (1,000,000) hit
+    message: >-
+      Too many inputs on the request. You are still allowed to process "allowed
+      value" valid inputs, however the total of valid inputs is equal to "inputs
+      requested".
+    applies_to: [ReadInventory]
+    detail: rate-limits/n3rgy-rate-limits.yml
+  - status: 429
+    key: update-now-daily-counter-exhausted
+    title: Update Now daily request counter reached zero
+    message: >-
+      Available request daily counter reached 0. You are not allowed to make more
+      data requests for the given combination.
+    applies_to: [generateFetchNowRequest]
+    detail: rate-limits/n3rgy-rate-limits.yml
+
+  # ---- 409 conflict ----
+  - status: 409
+    key: device-already-exists
+    title: Non-SMETS device already in the inventory
+    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#addDevice
+    note: Declared in the OpenAPI; no message text published in the developer guide.
+
+out_of_band_errors:
+  - condition: Read Inventory result file has no data
+    behaviour: >-
+      The CloudFront-hosted result URI returns HTTP 403 "Access Denied" when no
+      information is available. When collection itself failed, the file CONTENT is
+      the error. Files are retained for two days.
+    source: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - condition: Meter reading exceeds the maximum allowed value
+    behaviour: The reading is returned with the literal value "invalid value".
+    source: https://customer-api-user-manuals.data.n3rgy.com/requests/

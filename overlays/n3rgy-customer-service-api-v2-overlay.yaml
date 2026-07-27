@@ -1,0 +1,207 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the n3rgy Customer Service API V2
+  version: 1.0.0
+extends: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+x-generated: '2026-07-27'
+x-method: generated
+x-source: >-
+  Generated from the API Evangelist enrichment round of 2026-07-27. Captures our
+  additions to the harvested contract — tags (the original declares none),
+  external documentation links, the consent/quota semantics the spec cannot
+  express, and pointers to the derived artifacts — WITHOUT mutating the verbatim
+  harvest in openapi/.
+x-notes: >-
+  The upstream spec has 26 operations and zero tags, so every operation is
+  untagged and the generated tag set below is ours, following the segmentation in
+  review.yml. Nothing here changes an operation's inputs, outputs or status
+  codes.
+actions:
+  - target: $.info
+    update:
+      x-apievangelist-provider: n3rgy
+      x-apievangelist-enriched: '2026-07-27'
+      x-apievangelist-artifacts:
+        authentication: authentication/n3rgy-authentication.yml
+        conventions: conventions/n3rgy-conventions.yml
+        errors: errors/n3rgy-problem-types.yml
+        rate_limits: rate-limits/n3rgy-rate-limits.yml
+        sandbox: sandbox/n3rgy-sandbox.yml
+        data_model: data-model/n3rgy-data-model.yml
+        lifecycle: lifecycle/n3rgy-lifecycle.yml
+        webhooks: asyncapi/n3rgy-push-notifications-webhooks.yml
+        skills: skills/_index.yml
+      x-authorization-layers:
+        - api-key (x-api-key header, back-office enabled)
+        - end-customer consent for the HAN behind the MPxN
+        - account permission to change update frequencies
+
+  - target: $.externalDocs
+    update:
+      description: n3rgy Customer Service API Developer's Guide
+      url: https://customer-api-user-manuals.data.n3rgy.com/
+
+  - target: $
+    update:
+      tags:
+        - name: Consent & Property Discovery
+          description: >-
+            List the properties (MPxNs) this key holds consent for and discover
+            which utilities and reading types each property exposes.
+        - name: Readings
+          description: >-
+            Retrieve half-hourly / daily consumption, production and tariff data,
+            and force an on-demand meter fetch.
+        - name: Property Lookup
+          description: Resolve an MPxN or a UK post code + partial address to a meter.
+        - name: Update Frequency Control
+          description: >-
+            Read and set how often n3rgy pulls each reading type from the meters
+            — per device, per account default, or across the whole estate.
+        - name: Estate Health
+          description: DCC device inventory, firmware and last-communications checks.
+        - name: Third-Party Devices
+          description: >-
+            Register non-SMETS (non-DCC) devices and upload their reading data.
+        - name: Push Notifications
+          description: >-
+            Configure the account's push endpoint and read delivery status. See
+            asyncapi/n3rgy-push-notifications-webhooks.yml.
+        - name: Internal
+          description: Undocumented internal endpoints present in the published contract.
+
+  - target: $.paths./.get
+    update:
+      tags: [Consent & Property Discovery]
+      x-pagination:
+        style: offset
+        params: [startat, maxresults]
+        response_fields: [startAt, maxResults, total, entries]
+        max_page_size: 100
+        ordering: consent date, most recent first
+
+  - target: $.paths./mpxn/{mpxn}.get
+    update:
+      tags: [Consent & Property Discovery]
+      x-requires-consent: true
+
+  - target: $.paths./mpxn/{mpxn}/utility/{utility}.get
+    update:
+      tags: [Consent & Property Discovery]
+      x-requires-consent: true
+
+  - target: $.paths./mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}.get
+    update:
+      tags: [Readings]
+      x-requires-consent: true
+      x-cache-backed: >-
+        Served from n3rgy's cache of meter reads; the response carries
+        availableCacheRange {start, end} describing what is actually held.
+      x-supersedes: /{mpxn}/{utility}/{reading type}/{element}
+
+  - target: $.paths./update-now/mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}.get
+    update:
+      tags: [Readings]
+      x-requires-consent: true
+      x-quota:
+        scope: per customer per utility/reading-type combination
+        window: day
+        exhausted_status: 429
+        retry_safe: false
+        note: Each call decrements a daily counter; a blind retry burns quota.
+
+  - target: $.paths./find-mpxn/{identifier}.get
+    update:
+      tags: [Property Lookup]
+
+  - target: $.paths./find-mpxn/{identifier}/{address}.get
+    update:
+      tags: [Property Lookup]
+      x-input-encoding: Use '+' instead of spaces; partial address under 30 characters.
+
+  - target: $.paths./get-update-frequencies/{mpxn}.get
+    update:
+      tags: [Update Frequency Control]
+      x-requires-consent: true
+
+  - target: $.paths./set-meter-update-frequency.put
+    update:
+      tags: [Update Frequency Control]
+      x-requires-consent: true
+      x-requires-permission: frequency-change
+      x-idempotent: true
+
+  - target: $.paths./set-defaults.put
+    update:
+      tags: [Update Frequency Control]
+      x-requires-permission: frequency-change
+      x-scope: account defaults
+      x-idempotent: true
+
+  - target: $.paths./reset-all-update-frequencies.put
+    update:
+      tags: [Update Frequency Control]
+      x-requires-permission: frequency-change
+      x-scope: every consented HAN on the account
+      x-blast-radius: estate-wide
+      x-idempotent: true
+
+  - target: $.paths./read-inventory.post
+    update:
+      tags: [Estate Health]
+      x-async:
+        pattern: job + result URI
+        result_field: uri
+        job_id_field: uuid
+        retention: 2 days
+        typical_latency: 1-10 seconds per MPxN
+        extended_latency: up to 1 hour with last-communications or check-firmware
+        timeout: 1 hour, after which no file is written
+      x-quota:
+        items_per_element: 200
+        daily_processed_entries: 1000000
+        exhausted_status: 429
+      x-sandbox-limitation: check-firmware and last-communications do not work in the sandbox.
+
+  - target: $.paths./create-export-profiles.post
+    update:
+      tags: [Estate Health]
+      x-legacy: Targets the retired V1 solution.
+
+  - target: $.paths./upload/devices/.post
+    update: {tags: [Third-Party Devices]}
+  - target: $.paths./upload/devices/.get
+    update: {tags: [Third-Party Devices]}
+  - target: $.paths./upload/devices/deviceid/{deviceId}.get
+    update: {tags: [Third-Party Devices]}
+  - target: $.paths./upload/devices/deviceid/{deviceId}.put
+    update: {tags: [Third-Party Devices], x-idempotent: true}
+  - target: $.paths./upload/devices/deviceid/{deviceId}.delete
+    update: {tags: [Third-Party Devices], x-destructive: true}
+  - target: $.paths./upload/data/deviceid/{deviceId}/readingtype/{readingType}.post
+    update: {tags: [Third-Party Devices]}
+  - target: $.paths./upload/data/deviceid/{deviceId}/readingtype/{readingType}/starttime/{startTime}/endtime/{endTime}.delete
+    update: {tags: [Third-Party Devices], x-destructive: true}
+
+  - target: $.paths./push/configuration.get
+    update: {tags: [Push Notifications]}
+  - target: $.paths./push/configuration.post
+    update:
+      tags: [Push Notifications]
+      x-replace-semantics: >-
+        Replaces ALL existing configuration. An empty body resets both esme and
+        gsme subscriptions; an empty uri does NOT remove the registered endpoint.
+  - target: $.paths./push/configuration.delete
+    update: {tags: [Push Notifications], x-destructive: true}
+  - target: $.paths./push/status.get
+    update: {tags: [Push Notifications]}
+
+  - target: $.paths./internal/{mpxn}/{utility}/{readingType}.get
+    update: {tags: [Internal], x-internal: true}
+  - target: $.paths./internal/{mpxn}/{utility}/{readingType}.post
+    update:
+      tags: [Internal]
+      x-internal: true
+      x-contract-issue: >-
+        Declares an empty security array — the only operation in the contract
+        without ApiKeyAuth. Flagged for the provider.

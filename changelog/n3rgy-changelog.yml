@@ -1,0 +1,74 @@
+generated: '2026-07-27'
+method: searched
+source: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+docs: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+description: >-
+  n3rgy publishes a change log inside the Customer Service API developer guide.
+  It is a two-column Version / Description table with NO DATES — captured here
+  verbatim in published order. Two numbering series run in sequence: 1.0-1.17 are
+  documentation revisions of the developer guide itself, and 2.33.0-2.70.0 are
+  n3rgy data platform releases (the series starts at 2.33.0; earlier 2.x releases
+  are not published). The live page is the source of truth; this is the full
+  captured window as of 2026-07-27.
+versioning:
+  scheme: two series — doc revisions (1.x) then platform releases (2.x.y)
+  dated: false
+  current: 2.70.0
+  current_title: Meter Data Retrieval (MDR) release
+  detail: lifecycle/n3rgy-lifecycle.yml
+entry_count: 56
+
+entries:
+  # ---- platform releases (most recent first) ----
+  - {version: '2.70.0', series: platform, latest: true, highlights: [Meter Data Retrieval (MDR) release]}
+  - {version: '2.69.0', series: platform, highlights: [SRV 8.2 changes and fixes]}
+  - {version: '2.68.0', series: platform, highlights: [Forgot password and Update-Now fixes]}
+  - {version: '2.66.0', series: platform, highlights: [WAF, HAN limit and portal updates]}
+  - {version: '2.65.0', series: platform, highlights: [GUA import enhancements]}
+  - {version: '2.64.0', series: platform, highlights: [AMI and vulnerability updates]}
+  - {version: '2.63.0', series: platform, highlights: [CAD API changes]}
+  - {version: '2.62.0', series: platform, security: true, highlights: [Log4j vulnerability remediation]}
+  - {version: '2.61.0', series: platform, highlights: [Check Meter fixes]}
+  - {version: '2.60.0', series: platform, highlights: [Check Meter fixes]}
+  - {version: '2.56.0', series: platform, security: true, highlights: [Vulnerability audit, Check Meter patches and T&C updates]}
+  - {version: '2.55.0', series: platform, highlights: [Delete CAD API changes and Check Meter patches]}
+  - {version: '2.54.0', series: platform, highlights: [CAD handling and API logic improvements]}
+  - {version: '2.53.0', series: platform, highlights: [Check Meter release and QA sign-off]}
+  - {version: '2.52.0', series: platform, highlights: [Sign-up/login endpoints and EC2 updates]}
+  - {version: '2.51.0', series: platform, highlights: [Deployment, inventory and consent fixes]}
+  - {version: '2.46.0', series: platform, highlights: [Check Meter infrastructure and processing features]}
+  - {version: '2.45.0', series: platform, highlights: [Alarm fix and enhanced API logging]}
+  - {version: '2.44.0', series: platform, security: true, highlights: [Website, API and vulnerability updates]}
+  - {version: '2.43.0', series: platform, highlights: [V2 CAD dependency and alarm refinements]}
+  - {version: '2.42.0', series: platform, highlights: [API fixes, deployment improvements and tuning]}
+  - {version: '2.41.0', series: platform, highlights: [AWS VPN connectivity enhancements]}
+  - {version: '2.40.1', series: platform, breaking: [Document V1 removal], highlights: [Document V1 removal and readings fix, DCC quarantine request bug fix]}
+  - {version: '2.40.0', series: platform, security: true, highlights: [Consent portal date picker fix, 'Consent, API, security and monitoring enhancements', Security vulnerability remediation], note: three separate rows share this version number in the published table}
+  - {version: '2.39.1', series: platform, highlights: [AMI updates and API usage plan tuning]}
+  - {version: '2.39.0', series: platform, highlights: [Infrastructure nested stack fixes]}
+  - {version: '2.38.0', series: platform, highlights: [Data Purge Lambda tuning]}
+  - {version: '2.37.0', series: platform, highlights: [Data Limited new user release]}
+  - {version: '2.36.0', series: platform, highlights: [Data purge and backend bug fixes]}
+  - {version: '2.35.0', series: platform, highlights: [n3rgy Terms & Conditions functionality]}
+  - {version: '2.34.0', series: platform, highlights: [Consent management and portal updates]}
+  - {version: '2.33.0', series: platform, highlights: [DCC Gateway Library update]}
+
+  # ---- developer-guide documentation revisions ----
+  - {version: '1.17', series: docs, highlights: [Added electric-only and gas-only Sandbox MPxNs]}
+  - {version: '1.16', series: docs, highlights: [How the Tariffs are collected, and how to get historical Tariffs]}
+  - {version: '1.15', series: docs, highlights: [Update Read Inventory information, Enhance Find MPxN descriptions, Add summary on the specification methods, Enhance Push Notification specification, Update get-update-frequencies specification]}
+  - {version: '1.14', series: docs, highlights: [Update Sandbox information, New Sandbox non-SMETS devices (the ones with SMS as SMSO), Add gaps in Sandbox readings]}
+  - {version: '1.13', series: docs, highlights: ['"value not available in SMSO" will cease to exist, except for existing data']}
+  - {version: '1.12', series: docs, additions: [Push Notification API specification]}
+  - {version: '1.11', series: docs, highlights: [Live and Sandbox Read Inventory information updated, 'Responses using the check-firmware parameter might have mismatches', check-firmware is not available in Sandbox]}
+  - {version: '1.10', series: docs, highlights: ['Adding five new HANs to V1 Sandbox (MPANs: 1583932847741, 3248050660359, 3356176286976, 1563825762909, 2910405213697)']}
+  - {version: '1.9', series: docs, highlights: [Upload spec 405 error when posting information, Enhanced address lookup (find-mpxn) description when the request does not uniquely identify a premises, Sandbox cache information updated to show no GSME cache, Added find-mpxn by address examples, Sandbox read inventory information updated with real addresses]}
+  - {version: '1.8', series: docs, highlights: [Sandbox V1 MPxNs 1099999000064 and 1099999000091 given real addresses and postcodes, IHD removed from Sandbox V1 HAN with MPxN 1099999000064], additions: [update-now method]}
+  - {version: '1.7', series: docs, highlights: [Added 2 new HANs to Sandbox V1, postcode and address information (V1 only), Real addresses on 2 HANs, 'Update output format from CSV to RAW']}
+  - {version: '1.6', series: docs, highlights: [Added 10 new HANs to Sandbox V1]}
+  - {version: '1.5', series: docs, additions: [Dedicated page for Tariffs]}
+  - {version: '1.4', series: docs, additions: [find-mpxn by post code and partial address]}
+  - {version: '1.3', series: docs, additions: [read inventory endpoint information]}
+  - {version: '1.2', series: docs, highlights: [Modified information related with consent flags and corresponding access restrictions to the stored data]}
+  - {version: '1.1', series: docs, additions: [Sandbox API URL added to API specification]}
+  - {version: '1.0', series: docs, highlights: [Initial version, including information on Sandbox environment]}

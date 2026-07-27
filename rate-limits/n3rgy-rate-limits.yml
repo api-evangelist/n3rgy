@@ -1,0 +1,89 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: n3rgy
+providerId: n3rgy
+generated: '2026-07-27'
+method: searched
+created: '2026-07-27'
+modified: '2026-07-27'
+tags:
+  - Rate Limiting
+  - Smart Metering
+  - Energy Data
+description: >-
+  n3rgy does not publish a global requests-per-second rate limit. What it DOES
+  publish, in the Customer Service API V2 developer guide, are three concrete
+  quota ceilings enforced with HTTP 429 — a per-request item cap and a daily
+  processed-entries threshold on Read Inventory, and a per-customer daily
+  request counter on Update Now. There is no documented Retry-After or
+  X-RateLimit-* response header; the quota state is only surfaced in the 429
+  message body. The changelog entry "AMI updates and API usage plan tuning"
+  (2.39.1) confirms AWS API Gateway usage plans sit behind the key, but the
+  per-key throughput values are not published.
+sources:
+  - https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - https://customer-api-user-manuals.data.n3rgy.com/change-log/
+headers:
+  retryAfter: null
+  rateLimitRemaining: null
+  note: >-
+    No rate-limit signalling headers are documented. Quota exhaustion is
+    communicated only in the 429 JSON body message.
+responseCodes:
+  throttled: 429
+limits:
+  - name: Read Inventory items per element per request
+    scope: request
+    metric: items
+    limit: 200
+    operationId: ReadInventory
+    endpoint: POST /read-inventory
+    message: >-
+      The list of element chosen in request (mpxn/uprn/deviceId) exceeds the
+      maximum items allowed (200).
+    notes: >-
+      Applies independently to each of the mpxns, uprns and deviceIds arrays in
+      the request body.
+  - name: Read Inventory processed entries per day
+    scope: customer
+    metric: entries
+    limit: 1000000
+    timeFrame: day
+    operationId: ReadInventory
+    endpoint: POST /read-inventory
+    message: >-
+      Too many inputs on the request. You are still allowed to process "allowed
+      value" valid inputs, however the total of valid inputs is equal to "inputs
+      requested".
+    notes: >-
+      The daily threshold is the sum of all entries across all elements (mpxns,
+      uprns and/or deviceIds) in all requests that day.
+  - name: Update Now requests per utility/reading-type combination per day
+    scope: customer
+    metric: requests
+    limit: null
+    timeFrame: day
+    operationId: generateFetchNowRequest
+    endpoint: GET /update-now/mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}
+    message: >-
+      Available request daily counter reached 0. You are not allowed to make more
+      data requests for the given combination.
+    notes: >-
+      The counter is "the configured number of requests" — configured per
+      customer and NOT published as a number in the developer guide.
+  - name: Export profile creation (V1 solution)
+    scope: customer
+    metric: requests
+    limit: null
+    operationId: CreateExportProfiles
+    endpoint: POST /create-export-profiles
+    notes: >-
+      The OpenAPI declares a 429 response for this operation; the developer guide
+      does not document the threshold.
+pagination_caps:
+  - name: Retrieve Consented MPxNs page size
+    parameter: maxResults
+    default: 100
+    maximum: 100
+    operationId: RetrieveConsentedMPxNs

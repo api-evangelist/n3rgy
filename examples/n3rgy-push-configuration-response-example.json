@@ -1,0 +1,9 @@
+{
+  "pushNotificationURL": "endpoint.com",
+  "deviceConfigurations": {
+    "ELECTRICITY": [
+      "IMPORT",
+      "TARIFF"
+    ]
+  }
+}

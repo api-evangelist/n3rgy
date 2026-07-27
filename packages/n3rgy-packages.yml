@@ -1,0 +1,67 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  Probed npm (registry.npmjs.org), PyPI, RubyGems, Packagist, crates.io, NuGet and
+  the n3rgy developer guide (customer-api-user-manuals.data.n3rgy.com) for client
+  libraries on 2026-07-27.
+description: >-
+  n3rgy publishes NO first-party client libraries. Its GitHub organisation
+  (github.com/n3rgy) has zero public repositories and its own linked repo
+  github.com/n3rgy/data returns HTTP 404. The developer guide's "Schemas" page
+  lists an (empty) Postman-collection table and no SDK section. Everything below
+  is COMMUNITY-BUILT and unaffiliated with n3rgy data limited — recorded here for
+  discovery only, with official:false. Note that all three community libraries
+  target the LEGACY consumer API (consumer-api.data.n3rgy.com), which n3rgy has
+  withdrawn ("unfortunately the consumer API is not longer available (it's a
+  regulatory thing)" — github.com/n3rgy org bio), not the current Customer
+  Service API V2.
+official_sdks: false
+official_sdk_count: 0
+packages:
+  - language: javascript
+    registry: npm
+    name: n3rgy
+    version: 0.2.0
+    url: https://www.npmjs.com/package/n3rgy
+    source: https://github.com/MySmartMeterData/n3rgy-client
+    install: npm install n3rgy
+    license: MIT
+    official: false
+    maintainer: jonathanadams (jonathan@connockadams.uk)
+    note: >-
+      Community client. "This library provides convenient access to the n3rgy API
+      form server-side and browser based applications." Targets the legacy
+      consumer API.
+  - language: rust
+    registry: crates.io
+    name: n3rgy_consumer_api_client
+    version: 0.1.1
+    url: https://crates.io/crates/n3rgy_consumer_api_client
+    source: https://github.com/rars/n3rgy_consumer_api_client
+    install: cargo add n3rgy_consumer_api_client
+    official: false
+    note: >-
+      Community client — "A client for retrieving energy data from n3rgy's
+      consumer API". 2,251 downloads at time of capture.
+  - language: dotnet
+    registry: nuget
+    name: N3rgy.Api.Cli
+    version: 0.1.0
+    url: https://www.nuget.org/packages/N3rgy.Api.Cli
+    install: dotnet tool install --global N3rgy.Api.Cli
+    package_type: DotnetTool
+    author: Richard Russell
+    official: false
+    note: >-
+      Community .NET global tool — ".NET CLI for querying n3rgy API". This is the
+      only CLI surface that exists for n3rgy; it is third-party, so no first-party
+      cli/ artifact is emitted.
+registries_probed:
+  - {registry: npm, query: n3rgy, result: 1 community package}
+  - {registry: pypi, queries: [n3rgy, n3rgy-api, pyn3rgy, n3rgy-data], result: all HTTP 404}
+  - {registry: rubygems, query: n3rgy, result: empty}
+  - {registry: packagist, query: n3rgy, result: no matching package}
+  - {registry: crates.io, query: n3rgy, result: 1 community crate}
+  - {registry: nuget, query: n3rgy, result: 1 community tool}
+  - {registry: maven-central, query: n3rgy, result: not published}
+  - {registry: pkg.go.dev, query: n3rgy, result: not published}

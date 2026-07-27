@@ -1,0 +1,219 @@
+generated: '2026-07-27'
+method: derived
+source: >-
+  Derived from the 47 component schemas, path parameters and id-reference fields
+  in openapi/n3rgy-customer-service-api-v2-openapi.yaml, enriched with the entity
+  vocabulary published at
+  https://customer-api-user-manuals.data.n3rgy.com/requests/ and the sandbox
+  fixture table at /sandbox-mpxns/.
+docs: https://customer-api-user-manuals.data.n3rgy.com/requests/
+notation: >-
+  relationships use has_one / has_many / belongs_to with the referencing field
+  name; direction is from the entity that holds the reference.
+description: >-
+  The n3rgy domain is GB smart-metering, not a generic SaaS object graph. The
+  spine is: a CUSTOMER (the API key holder) holds CONSENT over a PROPERTY, which
+  maps to a HOME AREA NETWORK (HAN), which contains one or more DEVICES (ESME,
+  GSME, GPF, CPF, CHF, IHD), each addressed by an MPxN, and each producing
+  READINGS of a given reading type at a configured UPDATE FREQUENCY. The single
+  most important — and most counter-intuitive — rule in the whole model is that
+  the MPxN is only a HANDLE FOR THE HAN: the guide states explicitly that a
+  customer may pass an MPRN while requesting utility=electricity, because
+  resolution happens at HAN level, not meter level.
+
+entities:
+  - name: Customer
+    domain: identity
+    identified_by: x-api-key
+    description: >-
+      The business holding an n3rgy-issued API key. Not represented as an object
+      in the contract — it is implied by the key and is the scope for consents,
+      defaults, quotas and the push-notification endpoint.
+  - name: Consent
+    domain: consent
+    identified_by: (customer, HAN)
+    description: >-
+      The end occupant's grant allowing this customer to read data for a property.
+      Carries a status (active) and the per-reading-type update frequencies chosen
+      at consent time, plus a getHistoryData flag for pre-consent history.
+    fields: [status, getHistoryData, update frequencies per utility/reading type]
+    note: >-
+      No CRUD surface in the API — consent is granted and withdrawn through the
+      n3rgy Consumer Portal (data.n3rgy.com/consumer-login), then merely VALIDATED
+      here. It is the second authorisation layer above the API key.
+  - name: Property
+    domain: premises
+    identified_by: [MPxN, UPRN, post code + partial address]
+    description: >-
+      A physical premises. Reachable three ways: by MPxN, by UPRN (Read Inventory
+      only), or by UK post code + partial address (find-mpxn).
+    fields: [postCode, address, uprn]
+  - name: HAN
+    domain: metering
+    identified_by: resolved from any MPxN in the network
+    description: >-
+      Home Area Network — the SMETS2 mesh behind a property, joining the meters,
+      the comms hub and the in-home display. The true unit of consent and of
+      addressing.
+  - name: Device
+    domain: metering
+    identified_by: deviceId (EUI-64, e.g. 01-00-00-00-00-00-01-01)
+    description: >-
+      A physical device on the HAN. deviceType is one of ESME, ESME_EXPORT, GSME,
+      GPF, CPF, CHF, IHD.
+    fields:
+      - deviceId
+      - deviceType
+      - deviceStatus
+      - deviceManufacturer
+      - deviceModel
+      - deviceGbcsVersion
+      - deviceFirmwareVersion
+      - smetsChtsVersion
+      - commissionedDate
+      - importMPxN
+      - exportMPAN
+      - smso
+    schemas: [RetrieveMPxNAvailabilitySuccessResponse, UploadDevice, AMRDevice]
+  - name: MPxN
+    domain: metering
+    identified_by: 1-13 digit numeric string
+    description: >-
+      Meter Point Administration Number (MPAN, electricity) or Meter Point
+      Reference Number (MPRN, gas). Umbrella term MPxN. Used to resolve the HAN.
+  - name: Utility
+    domain: metering
+    enum: [electricity, gas]
+  - name: ReadingType
+    domain: readings
+    enum:
+      - import
+      - consumption
+      - export
+      - production
+      - tariff
+      - READ_INSTANTANEOUS_IMPORT_REGISTERS
+      - READ_INSTANTANEOUS_EXPORT_REGISTERS
+      - RETRIEVE_IMPORT_DAILY_READ_LOG
+      - RETRIEVE_EXPORT_DAILY_READ_LOG
+      - RETRIEVE_DAILY_CONSUMPTION_LOG
+    note: RETRIEVE_EXPORT_DAILY_READ_LOG is electricity only.
+  - name: Reading
+    domain: readings
+    description: >-
+      A metered value at a timestamp. Half-hourly by default; day granularity
+      available for consumption/production.
+    fields: [timestamp, primaryValue, secondaryValue, additionalInformation, type]
+    schemas: [MeteredValues, RetrieveReadingDataSuccessResponse]
+    note: >-
+      A value the meter reports above the maximum allowed comes back as the
+      literal string "invalid value".
+  - name: CacheRange
+    domain: readings
+    description: >-
+      The window {start, end} for which n3rgy actually holds readings. Returned on
+      every data response so a client can tell coverage from request window.
+    fields: [start, end]
+  - name: Tariff
+    domain: pricing
+    description: >-
+      The SMETS tariff structure for a meter. In RAW output format it is the
+      switching-table model straight off the meter.
+    fields:
+      - currencyUnitsLabel
+      - currencyUnitsName
+      - standingCharge
+      - standingChargeScale
+      - priceScale
+      - primaryActiveTariffPrice
+      - switchingTable
+      - dayProfiles
+      - weekProfiles
+      - seasons
+      - specialDays
+      - touPrices
+      - blockPriceMatrix
+      - blockThresholdMatrix
+    docs:
+      - https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+      - https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - name: UpdateFrequency
+    domain: control
+    enum: [NEVER, H_2, H_6, H_12, DAILY, WEEKLY, MONTHLY]
+    description: >-
+      How often n3rgy pulls a given reading type from the meter. Set per device
+      (SetMeterUpdateFrequency), per account default (SetDefaults), or forced
+      across every consented HAN (ResetAllUpdateFrequencies). NEVER means the
+      corresponding data endpoint returns 403, not an empty series.
+    schemas: [SetMeterUpdateFrequencyBody, SetDefaultsBodyRequest, ResetAllUpdateFrequenciesRequest]
+  - name: ReadInventoryRequest
+    domain: estate
+    identified_by: uuid
+    description: >-
+      An asynchronous DCC device-inventory job over up to 200 mpxns, uprns and/or
+      deviceIds. Returns {status, uuid, uri}; the payload lands at the CloudFront
+      uri and is retained two days.
+    fields: [status, uuid, uri]
+    schemas: [ReadInventoryBodyRequest, ReadInventorySuccessResponseNoQueryParams]
+  - name: UploadDevice
+    domain: third-party-devices
+    identified_by: deviceId
+    description: >-
+      A non-SMETS ("non-DCC") device a customer registers with n3rgy so its
+      readings can be uploaded and served alongside smart-meter data.
+    schemas: [UploadDevice]
+  - name: PushNotificationConfiguration
+    domain: events
+    identified_by: customer
+    description: >-
+      One HTTPS endpoint plus per-device-type utility subscriptions. One per
+      account.
+    fields: [uri / pushNotificationURL, esme, gsme, deviceConfigurations]
+    schemas: [PushNotificationBodyRequest]
+    detail: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - name: PushNotificationStatus
+    domain: events
+    fields: [lastHttpStatus, lastResponse, date]
+
+relationships:
+  - {from: Customer, to: Consent, kind: has_many, via: x-api-key}
+  - {from: Consent, to: HAN, kind: belongs_to, via: mpxn}
+  - {from: Property, to: HAN, kind: has_one, via: mpxn}
+  - {from: HAN, to: Device, kind: has_many, via: deviceId}
+  - {from: Device, to: MPxN, kind: has_one, via: importMPxN}
+  - {from: Device, to: MPxN, kind: has_one, via: exportMPAN, note: electricity export registration}
+  - {from: MPxN, to: HAN, kind: belongs_to, via: mpxn, note: MPxN resolves the HAN, NOT a single meter}
+  - {from: Device, to: Utility, kind: has_one, via: deviceType}
+  - {from: Device, to: Reading, kind: has_many, via: (mpxn, utility, readingType)}
+  - {from: Reading, to: ReadingType, kind: belongs_to, via: readingType}
+  - {from: Device, to: UpdateFrequency, kind: has_many, via: (deviceID, importUpdateFrequency/exportUpdateFrequency)}
+  - {from: Consent, to: UpdateFrequency, kind: has_many, via: consent-time frequency choices}
+  - {from: Device, to: Tariff, kind: has_one, via: (mpxn, utility, readingType=tariff)}
+  - {from: RetrieveReadingDataSuccessResponse, to: CacheRange, kind: has_one, via: availableCacheRange}
+  - {from: RetrieveReadingDataSuccessResponse, to: MeteredValues, kind: has_many, via: 'devices[].values'}
+  - {from: ReadInventoryRequest, to: Property, kind: has_many, via: mpxns/uprns/deviceIds}
+  - {from: Customer, to: PushNotificationConfiguration, kind: has_one, via: x-api-key}
+  - {from: PushNotificationConfiguration, to: PushNotificationStatus, kind: has_one, via: last delivery attempt}
+  - {from: Customer, to: UploadDevice, kind: has_many, via: deviceId}
+  - {from: UploadDevice, to: Reading, kind: has_many, via: (deviceId, readingType)}
+
+addressing_paths:
+  - by: MPxN
+    operationId: RetrieveMPxNAvailability
+    path: '/find-mpxn/{identifier}'
+  - by: post code + partial address
+    operationId: mpxnFromAddress
+    path: '/find-mpxn/{identifier}/{address}'
+  - by: UPRN
+    operationId: ReadInventory
+    path: /read-inventory
+  - by: deviceId
+    operationId: getDevice
+    path: '/upload/devices/deviceid/{deviceId}'
+
+vocabulary_note: >-
+  MPxN, MPAN, MPRN, HAN, ESME, GSME, GPF, CPF, CHF, IHD, SMSO, DCC, SMETS2 and
+  UPRN are Great Britain smart-metering terms of art (Smart Energy Code / Smart
+  Metering Implementation Programme), not n3rgy inventions. No Green Button /
+  ESPI, CDR energy, IEC CIM, IEEE 2030.5 or OpenADR vocabulary appears anywhere in
+  the contract — see conformance/n3rgy-conformance.yml.

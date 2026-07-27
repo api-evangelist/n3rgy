@@ -1,0 +1,206 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  https://customer-api-user-manuals.data.n3rgy.com/ (Overview, Authentication,
+  Requests, Schemas, Electricity/Gas format pages), cross-derived from
+  openapi/n3rgy-customer-service-api-v2-openapi.yaml.
+description: >-
+  Cross-cutting request/response semantics of the n3rgy Customer Service API V2 —
+  the runtime behaviour that applies to every operation rather than to any one
+  endpoint. n3rgy is a GB smart-metering data platform, so its conventions are
+  shaped by two things OpenAPI cannot express: (1) a SECOND authorisation layer
+  on top of the API key — per-property end-customer consent, validated server-side
+  against the HAN behind the supplied MPxN; and (2) an ASYNCHRONOUS, cache-backed
+  data model — readings are collected from physical meters on a per-property
+  update frequency, so a 200 means "here is the cache", not "here is a live
+  meter read".
+
+base_urls:
+  live: https://api-v2.data.n3rgy.com
+  sandbox: https://api-v2-sandbox.data.n3rgy.com
+api_style: REST over HTTPS, JSON request and response bodies (AWS API Gateway + Lambda)
+
+authentication:
+  scheme: API key in the x-api-key request header
+  scheme_name: ApiKeyAuth
+  docs: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  detail: authentication/n3rgy-authentication.yml
+  provisioning: >-
+    Not self-serve. "Access to the Customer Service API must be enabled for the
+    user's live API key by the n3rgy data backoffice." The sandbox key must be
+    enabled separately.
+  second_layer:
+    name: consent verification
+    applies_to: >-
+      Every consent-bearing operation (utilities, reading types, data retrieval,
+      update frequencies, update-now, set-meter-update-frequency).
+    rule: >-
+      The customer must hold an ACTIVE consent for the HAN identified by the
+      supplied MPxN. Absent consent returns 403 "Consent for the given MPxN not
+      found." — not 404.
+  third_layer:
+    name: frequency-change permission
+    applies_to: [SetMeterUpdateFrequency, SetDefaults, ResetAllUpdateFrequencies]
+    rule: >-
+      The customer account must additionally be flagged as allowed to change
+      update frequencies, or the call returns 403.
+  legacy: >-
+    n3rgy data 1.x used an Authorization header. n3rgy data 2.0 migrated every
+    endpoint to X-API-KEY.
+
+idempotency:
+  supported: false
+  mechanism: null
+  notes: >-
+    n3rgy publishes NO idempotency-key contract. There is no Idempotency-Key
+    header or parameter anywhere in the OpenAPI or the developer guide. Safety on
+    retry comes only from HTTP verb semantics: the four frequency-control
+    operations are PUT and are naturally idempotent (SetMeterUpdateFrequency,
+    SetDefaults, ResetAllUpdateFrequencies, updateDevice), as are the device
+    DELETEs. The genuinely non-idempotent calls are POST /read-inventory (each
+    call consumes the daily processed-entries quota and mints a new result uuid)
+    and GET /update-now (each call decrements a per-combination daily counter),
+    so blind retries there BURN QUOTA — retry with backoff only on 5xx, never on
+    429.
+
+pagination:
+  style: offset
+  applies_to: [RetrieveConsentedMPxNs]
+  request_params:
+    startAt: Index of the first element to return. Optional, default 0.
+    maxResults: Page size. Optional, default 100, maximum 100.
+  response_fields:
+    startAt: echo of the requested offset
+    maxResults: echo of the effective page size
+    total: total number of consented MPxNs available
+    entries: the page itself (array of MPxN strings)
+  ordering: >-
+    Consented MPxNs are ordered by consent date, most recent first.
+  notes: >-
+    Only the consented-MPxN listing is paginated. Reading data is bounded by the
+    start / end / granularity time window instead, and Read Inventory is bounded
+    by the 200-items-per-element request cap.
+
+response_envelope:
+  success_shape: >-
+    Every JSON success body carries `resource` (the request path) and
+    `responseTimestamp` (ISO 8601, e.g. 2022-04-10T17:07:01.580Z), then the
+    operation-specific payload (`entries`, `devices`, `utilities`, `status`, ...).
+  example: |
+    {
+      "resource": "/",
+      "responseTimestamp": "2022-04-10T17:07:01.580Z",
+      "startAt": 0,
+      "maxResults": 100,
+      "total": 13,
+      "entries": ["1234567891026", "1234567891000"]
+    }
+  exceptions:
+    - >-
+      POST /push/configuration returns 204 with no body.
+    - >-
+      POST /read-inventory returns {status, uuid, uri} — the payload is fetched
+      separately from the returned CloudFront uri.
+    - >-
+      GET /push/status returns a flat {lastHttpStatus, lastResponse, date} object
+      with no resource/responseTimestamp wrapper.
+
+error_envelope:
+  primary: '{"errors": [{"code": <http-status>, "message": "<text>"}]}'
+  secondary: '{"message": "<text>"}'
+  machine_readable_codes: false
+  notes: >-
+    The `code` field repeats the HTTP status; there is no stable symbolic error
+    code, so clients must match on the human-readable message string. Full
+    catalogue in errors/n3rgy-problem-types.yml.
+  detail: errors/n3rgy-problem-types.yml
+
+content_negotiation:
+  request: application/json
+  response: application/json
+  alternative_formats:
+    - >-
+      outputFormat=csv on RetrieveDataForReadingType for consumption/production
+      reading types.
+    - >-
+      outputFormat=raw|json on tariff reading types. RAW returns the SMETS
+      switching-table structure (dayProfiles / weekProfiles / seasons /
+      touPrices / blockPriceMatrix); JSON returns a flattened form. Field
+      dictionaries: /electricity-format/ and /gas-format/.
+
+date_and_time:
+  formats_accepted: [yyyyMMddHHmmss, yyyyMMddHHmm, yyyyMMdd]
+  parameters: [start, end]
+  defaults:
+    start: yesterday at 00:30
+    end: today at 00:00
+  granularity: {values: [halfhour, day], default: halfhour}
+  timestamps_returned: ISO 8601 with milliseconds (responseTimestamp)
+  notes: >-
+    start / end / granularity do not apply to the tariff reading type;
+    outputFormat applies only to tariff.
+
+identifiers:
+  mpxn:
+    description: >-
+      MPxN is the umbrella term for MPAN (electricity) and MPRN (gas). 1-13
+      digits.
+    important: >-
+      The MPxN is used ONLY to resolve the HAN. A customer may legitimately pass
+      an MPRN while requesting utility=electricity, and vice versa.
+  device_id: EUI-64 style, colon/hyphen separated (e.g. 01-00-00-00-00-00-01-01)
+  uprn: UK Unique Property Reference Number, accepted by Read Inventory
+  device_types: [ESME, GSME, GPF, CPF, CHF, IHD, ESME_EXPORT]
+  detail: data-model/n3rgy-data-model.yml
+
+asynchrony_and_caching:
+  model: >-
+    Reading data is served from n3rgy's cache of meter reads, refreshed on the
+    per-property update frequency set at consent time. The response carries
+    `availableCacheRange` {start, end} so a client can tell what the cache
+    actually holds before trusting the window it asked for.
+  update_frequencies: [NEVER, H_2, H_6, H_12, DAILY, WEEKLY, MONTHLY]
+  never_semantics: >-
+    A reading type whose update frequency is "never" returns 403 rather than an
+    empty series — the consent, not the data, is the gate.
+  update_now: >-
+    GET /update-now forces a fetch from the latest end-cache date. It is
+    quota-limited per utility/reading-type combination per day.
+  read_inventory: >-
+    POST /read-inventory is asynchronous. A 200 means the request was accepted;
+    the payload lands at the returned CloudFront `uri`. Simple requests resolve in
+    1-10 seconds per MPxN; requests with last-communications or check-firmware go
+    out to the physical devices and may take up to 1 hour, after which the system
+    times out and no file is written. Result files are retained for TWO DAYS.
+    Responses are cached; only last-communications / check-firmware force a
+    refresh.
+
+request_tracing:
+  request_id_header: null
+  notes: >-
+    No request-id or correlation header is documented. The only per-request handle
+    is the `uuid` returned by Read Inventory. AWS API Gateway's own
+    x-amzn-RequestId is present on responses but is not a documented contract.
+
+versioning:
+  scheme: major version in the host name
+  current: V2 (https://api-v2.data.n3rgy.com)
+  mechanism: >-
+    Version is carried by the host, not by a path prefix, header or date. There is
+    no Accept-version or API-Version header.
+  detail: lifecycle/n3rgy-lifecycle.yml
+
+rate_limit_signalling:
+  headers: none documented
+  status: 429
+  detail: rate-limits/n3rgy-rate-limits.yml
+
+webhooks:
+  supported: true
+  name: Push Notification
+  detail: asyncapi/n3rgy-push-notifications-webhooks.yml
+
+sandbox:
+  supported: true
+  host: https://api-v2-sandbox.data.n3rgy.com
+  detail: sandbox/n3rgy-sandbox.yml

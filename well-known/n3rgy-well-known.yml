@@ -1,0 +1,72 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  Live probes of the /.well-known/ discovery surface on 2026-07-27 against every
+  apis.yml host, both OpenAPI servers[] hosts, and the docs host.
+description: >-
+  n3rgy serves NO /.well-known/ discovery documents anywhere. Both API Gateway
+  hosts answer a uniform JSON 404 ({"message":"Resource not found."}) for every
+  path. The two web hosts are single-page / static-site shells that answer HTTP
+  200 with text/html for ANY path — those are false positives, recorded as
+  present-but-not-a-real-document and NOT saved. No security.txt, no OIDC
+  discovery, no OAuth authorization-server metadata, no api-catalog, no
+  ai-plugin. This is consistent with the API's auth model: a back-office-issued
+  x-api-key header, with no OAuth or OIDC anywhere in the estate.
+security_txt: false
+openid_configuration: false
+oauth_authorization_server: false
+api_catalog: false
+hosts:
+  - host: https://api-v2.data.n3rgy.com
+    role: OpenAPI servers[] — Live API
+    behaviour: AWS API Gateway; JSON 404 for unknown paths
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+  - host: https://api-v2-sandbox.data.n3rgy.com
+    role: OpenAPI servers[] — Sandbox API
+    behaviour: AWS API Gateway; JSON 404 for unknown paths
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+  - host: https://customer-api-user-manuals.data.n3rgy.com
+    role: developer portal (MkDocs Material)
+    behaviour: >-
+      Static site returns the 18,170-byte MkDocs 404 page as text/html with HTTP
+      200 for every unknown path — every probe below is a FALSE POSITIVE, not a
+      document.
+    documents:
+      - {path: /.well-known/security.txt, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/openid-configuration, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/oauth-authorization-server, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/api-catalog, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/ai-plugin.json, status: 200, content_type: text/html, real_document: false}
+  - host: https://data.n3rgy.com
+    role: consumer / business portal (Angular SPA)
+    behaviour: >-
+      SPA serves the same 814-byte index.html as text/html with HTTP 200 for every
+      path — every probe below is a FALSE POSITIVE, not a document.
+    documents:
+      - {path: /.well-known/security.txt, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/openid-configuration, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/oauth-authorization-server, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/api-catalog, status: 200, content_type: text/html, real_document: false}
+      - {path: /.well-known/ai-plugin.json, status: 200, content_type: text/html, real_document: false}
+  - host: https://www.n3rgy.com
+    role: marketing website (WordPress)
+    behaviour: >-
+      404 for /.well-known/security.txt on first request; subsequent automated
+      probes were answered 503 by the site's WAF (Wordfence rate limiting), so
+      further paths could not be confirmed and are recorded as unknown.
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 503, note: WAF rate-limited}
+      - {path: /.well-known/oauth-authorization-server, status: 503, note: WAF rate-limited}
+      - {path: /.well-known/api-catalog, status: 503, note: WAF rate-limited}
+      - {path: /.well-known/ai-plugin.json, status: 503, note: WAF rate-limited}

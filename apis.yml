@@ -78,7 +78,35 @@ apis:
     url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
   - type: SignUp
     url: https://data.n3rgy.com/business-sign-up
+  - type: Overlay
+    url: overlays/n3rgy-customer-service-api-v2-overlay.yaml
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: MCPServer
+    url: mcp/n3rgy-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+  - type: AgentSkill
+    url: skills/_index.yml
 common:
+- type: AgenticAccess
+  url: agentic-access/n3rgy-agentic-access.yml
+- type: DomainSecurity
+  url: security/n3rgy-domain-security.yml
+- type: Authentication
+  url: authentication/n3rgy-authentication.yml
 - type: Website
   url: https://www.n3rgy.com/
 - type: Documentation
@@ -101,6 +129,22 @@ common:
   url: https://www.n3rgy.com/about-us/
 - type: GitHubOrganization
   url: https://github.com/n3rgy
+- type: DeveloperPortal
+  url: https://customer-api-user-manuals.data.n3rgy.com/
+- type: HelpCenter
+  url: https://support.n3rgy.com/support/home
+- type: Packages
+  url: packages/n3rgy-packages.yml
+- type: WellKnown
+  url: well-known/n3rgy-well-known.yml
+- type: LLMsTxt
+  url: llms/n3rgy-llms.txt
+- type: Conformance
+  url: conformance/n3rgy-conformance.yml
+- type: Lifecycle
+  url: lifecycle/n3rgy-lifecycle.yml
+- type: ChangeLog
+  url: changelog/n3rgy-changelog.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

@@ -1,0 +1,5 @@
+{
+  "uri": "www.dummy.url.com",
+  "esme": ["IMPORT", "TARIFF"],
+  "gsme": ["IMPORT"]
+}

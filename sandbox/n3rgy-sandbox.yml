@@ -1,0 +1,633 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  https://customer-api-user-manuals.data.n3rgy.com/sandbox-mpxns/,
+  https://customer-api-user-manuals.data.n3rgy.com/sandbox-authentication/,
+  https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/,
+  https://customer-api-user-manuals.data.n3rgy.com/sandbox-ReadInventory/,
+  https://www.n3rgy.com/business/
+docs:
+  - https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - https://customer-api-user-manuals.data.n3rgy.com/sandbox-mpxns/
+  - https://customer-api-user-manuals.data.n3rgy.com/sandbox-authentication/
+  - https://customer-api-user-manuals.data.n3rgy.com/sandbox-ReadInventory/
+description: >-
+  n3rgy separates test from live by HOST, not by key prefix: the sandbox is a
+  second AWS API Gateway deployment of the identical Customer Service API V2
+  contract at https://api-v2-sandbox.data.n3rgy.com, declared as the second
+  servers[] entry in the OpenAPI. Every sandbox endpoint "presents the same
+  definition and behaviour" as its live counterpart and applies the same
+  authentication and consent validation. What makes the sandbox usable is a
+  published estate of DEMONSTRATION PROPERTIES — fixed MPxNs with pre-granted
+  consent, real UK postcodes and addresses, device IDs, IHD MAC addresses and
+  tariff availability — captured verbatim below from the developer guide. These
+  are n3rgy's published test fixtures; nothing here is invented.
+  The sandbox tier is free; the business page describes it as shipping
+  "thousands of demonstration properties", and a paid upgrade to live data is
+  arranged by contacting the company.
+
+modes:
+  - name: sandbox
+    host: https://api-v2-sandbox.data.n3rgy.com
+    key: separate sandbox API key
+    free: true
+    provisioning: >-
+      "Access to the Customer Service API Sandbox must be enabled for the user's
+      sandbox API key by the n3rgy data backoffice." Start with the business
+      sign-up form at https://data.n3rgy.com/business-sign-up.
+  - name: live
+    host: https://api-v2.data.n3rgy.com
+    key: separate live API key
+    free: false
+    provisioning: >-
+      "Access to the Customer Service API must be enabled for the user's live API
+      key by the n3rgy data backoffice." Upgrade is arranged by contacting n3rgy;
+      there is no self-serve checkout.
+
+separation:
+  mechanism: hostname
+  key_prefixes: none published
+  notes: >-
+    There are no sk_test_/sk_live_ style prefixes. A key is bound to an
+    environment by back-office provisioning; the client selects the environment by
+    choosing the base URL.
+
+authentication:
+  header: x-api-key
+  same_as_live: true
+  consent_validation: >-
+    Applied in the sandbox exactly as in live — the demonstration MPxNs below
+    ship with consent already granted so the consent-bearing endpoints return
+    data.
+  docs: https://customer-api-user-manuals.data.n3rgy.com/sandbox-authentication/
+
+limitations:
+  - >-
+    check-firmware is NOT available in the sandbox (change log 1.11); the
+    sandbox Read Inventory page warns: "Please, do not use the check-firmware or
+    last-communications parameters. It will not work and returns an error."
+  - >-
+    Sandbox readings deliberately contain GAPS (change log 1.14) so clients are
+    forced to handle missing half-hourly intervals.
+  - >-
+    No GSME cache in the sandbox (change log 1.9).
+  - >-
+    V1 Sandbox is deprecated — "please contact Support (https://support.n3rgy.com)".
+    Only the V2 sandbox host is current.
+
+# Demonstration properties published for the Customer Service API V2 sandbox.
+# The anchor row of each block is the primary (usually ESME) meter identified by
+# its MPxN; han_devices lists the other devices on the same Home Area Network.
+sandbox_mpxns:
+  - mpxn: '1234567891000'
+    device_id: 01-00-00-00-00-00-01-01
+    device_type: ESME
+    ihd_mac: D2E45EEC4B5A6D6A
+    smso: DCC
+    post_code: B66 3JP
+    address: "28,ASHCROFT,WINDMILL LANE,SMETHWIC"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891001', device_id: 01-00-00-00-00-00-01-02, device_type: GSME}
+      - {device_id: 01-00-00-00-00-00-01-03, device_type: GPF}
+      - {device_id: 01-00-00-00-00-00-01-04, device_type: CHF}
+      - {device_id: D2-E4-5E-EC-4B-5A-6D-6A, device_type: IHD}
+  - mpxn: '1234567891002'
+    device_id: 02-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: 123B59AC03AD98A5
+    smso: DCC
+    post_code: NG9 7GN
+    address: "156,,BROOKHILL STREET,,STAPLEFORD"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891003', device_id: 02-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 02-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 02-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: 12-3B-59-AC-03-AD-98-A5, device_type: IHD}
+  - mpxn: '1234567891004'
+    device_id: 03-00-00-00-00-00-03-01
+    device_type: ESME
+    ihd_mac: 99860F774DCF60FC
+    smso: DCC
+    post_code: BD9 6QH
+    address: "7,,BRANTWOOD CLOSE,,,BRADFORD"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891005', device_id: 03-00-00-00-00-00-03-02, device_type: GSME}
+      - {device_id: 03-00-00-00-00-00-03-03, device_type: GPF}
+      - {device_id: 03-00-00-00-00-00-03-04, device_type: CHF}
+      - {device_id: 03-86-0F-77-4D-CF-60-FC, device_type: IHD}
+  - mpxn: '1234567891006'
+    device_id: 04-00-00-00-00-00-04-01
+    device_type: ESME
+    ihd_mac: F4EC151EE4D9A610
+    smso: DCC
+    post_code: B45 0LY
+    address: "7,,JUBILEE ROAD,RUBERY,REDNAL"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891007', device_id: 04-00-00-00-00-00-04-02, device_type: GSME}
+      - {device_id: 04-00-00-00-00-00-04-03, device_type: GPF}
+      - {device_id: 04-00-00-00-00-00-04-04, device_type: CHF}
+      - {device_id: F4-EC-15-1E-E4-D9-A6-10, device_type: IHD}
+  - mpxn: '1234567891008'
+    device_id: 05-00-00-00-00-00-05-01
+    device_type: ESME
+    ihd_mac: D55E0632DDEEBEC8
+    smso: DCC
+    post_code: RG30 2TL
+    address: "139,ELM PARK ROAD,READING"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891009', device_id: 05-00-00-00-00-00-05-02, device_type: GSME}
+      - {device_id: 05-00-00-00-00-00-05-03, device_type: GPF}
+      - {device_id: 05-00-00-00-00-00-05-04, device_type: CHF}
+      - {device_id: D5-5E-06-32-DD-EE-BE-C8, device_type: IHD}
+  - mpxn: '1234567891010'
+    device_id: 06-00-00-00-00-00-06-01
+    device_type: ESME
+    ihd_mac: 787065F0B0D84625
+    smso: DCC
+    post_code: WR14 1QP
+    address: "4,COWLEIGH BANK,MALVERN"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891011', device_id: 06-00-00-00-00-00-06-02, device_type: GSME}
+      - {device_id: 06-00-00-00-00-00-06-03, device_type: GPF}
+      - {device_id: 06-00-00-00-00-00-06-04, device_type: CHF}
+      - {device_id: 78-70-65-F0-B0-D8-46-25, device_type: IHD}
+  - mpxn: '5330642497188'
+    device_id: 13-00-00-00-00-00-01-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F5D9
+    smso: DCC
+    post_code: DY4 0TD
+    address: "6,SWANCROFT HOUSE,STRATHMORE ROAD,,"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '3306698112580', device_id: 13-00-00-00-00-00-01-01, device_type: EXPORT}
+      - {mpxn: '1235784658515', device_id: 13-00-00-00-00-00-01-02, device_type: GSME}
+      - {device_id: 13-00-00-00-00-00-01-03, device_type: GPF}
+      - {device_id: 13-00-00-00-00-00-01-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F5-D9, device_type: IHD}
+  - mpxn: '0061448158717'
+    device_id: 14-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: 27B89D526C13BFDA
+    smso: DCC
+    post_code: AL3 4LZ
+    address: "64,,WESTFIELDS,,,ST. ALBANS,HERTFO"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1235784658516', device_id: 14-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 14-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 14-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: 27-B8-9D-52-6C-13-BF-DA, device_type: IHD}
+  - mpxn: '1099999999990'
+    device_id: 15-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F502
+    smso: DCC
+    post_code: GU51 1DF
+    address: "4,,,Ovington Drive,,FLEET"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658517', device_id: 15-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 15-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 15-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F5-02, device_type: IHD}
+  - mpxn: '1099999999981'
+    device_id: 16-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F602
+    smso: DCC
+    post_code: M24 2LX
+    address: "88,JUBILEE ROAD,MIDDLETON,MANC"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658518', device_id: 16-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 16-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 16-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F6-02, device_type: IHD}
+  - mpxn: '1234567891022'
+    device_id: 17-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F702
+    smso: DCC
+    post_code: M27 4JT
+    address: "1,WILTON AVENUE,PENDLEBURY,SWINTON"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658519', device_id: 17-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 17-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 17-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F7-02, device_type: IHD}
+  - mpxn: '1234567891024'
+    device_id: 18-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F802
+    smso: DCC
+    post_code: WF9 2UW
+    address: "18,NORTHCROFT AVENUE,SOUTH ELMSALL"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658520', device_id: 18-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 18-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 18-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F8-02, device_type: IHD}
+  - mpxn: '1234567891026'
+    device_id: 19-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F902
+    smso: DCC
+    post_code: GU52 8BY
+    address: "32,,OAKWOOD,,CHURCH CROOKHAM,FLEET"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658521', device_id: 19-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 19-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 19-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F9-02, device_type: IHD}
+  - mpxn: '1234567891028'
+    device_id: 20-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F603
+    smso: DCC
+    post_code: BA21 5JD
+    address: "14,,PEMBROKE CLOSE,,,YEOVIL,SOMERS"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658522', device_id: 20-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 20-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 20-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F6-03, device_type: IHD}
+  - mpxn: '1234567891030'
+    device_id: 21-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F703
+    smso: DCC
+    post_code: S21 4GD
+    address: "17,WILLIAM STREET,ECKINGTON,SHEFFI"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658523', device_id: 21-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 21-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 21-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F7-03, device_type: IHD}
+  - mpxn: '1234567891032'
+    device_id: 22-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F803
+    smso: DCC
+    post_code: E12 5AD
+    address: "673,,ROMFORD ROAD,,,LONDON"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658524', device_id: 22-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 22-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 22-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F8-03, device_type: IHD}
+  - mpxn: '1234567891034'
+    device_id: 23-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F903
+    smso: DCC
+    post_code: HR2 7SX
+    address: "42,,WESTHOLME ROAD,,BELMONT,HEREFO"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658525', device_id: 23-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 23-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 23-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F9-03, device_type: IHD}
+  - mpxn: '1234567891036'
+    device_id: 24-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F604
+    smso: DCC
+    post_code: BN1 8JH
+    address: "25,,WILMINGTON WAY,,,BRIGHTON"
+    consent: False
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658526', device_id: 24-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 24-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 24-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F6-04, device_type: IHD}
+  - mpxn: '1234567891038'
+    device_id: 25-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F704
+    smso: DCC
+    post_code: GU14 6JN
+    address: "113,,QUEENS ROAD,,,FARNBOROUGH"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1235784658527', device_id: 25-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 25-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 25-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F7-04, device_type: IHD}
+  - mpxn: '2234567891000'
+    device_id: 26-00-00-00-00-00-02-01
+    device_type: ESME
+    ihd_mac: E973492D2CE4F804
+    smso: DCC
+    post_code: OL2 8EF
+    address: "120,DUNWOOD PARK COURTS,MILNROW"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1542017526160', device_id: 26-00-00-00-00-00-02-01, device_type: EXPORT}
+      - {mpxn: '1235784658528', device_id: 26-00-00-00-00-00-02-02, device_type: GSME}
+      - {device_id: 26-00-00-00-00-00-02-03, device_type: GPF}
+      - {device_id: 26-00-00-00-00-00-02-04, device_type: CHF}
+      - {device_id: E9-73-49-2D-2C-E4-F8-04, device_type: IHD}
+  - mpxn: '1234567891012'
+    device_id: 07-00-00-00-00-00-07-01
+    device_type: ESME
+    ihd_mac: AA0D034FC99EBA36
+    smso: Secure
+    post_code: HD1 3RT
+    address: "139,VICTORIA ROAD,HUDDERSFIELD"
+    consent: True
+    has_tariff: True
+    han_devices:
+      - {mpxn: '1234567891013', device_id: 07-00-00-00-00-00-07-02, device_type: GSME}
+      - {device_id: 07-00-00-00-00-00-07-03, device_type: GPF}
+      - {device_id: 07-00-00-00-00-00-07-04, device_type: CHF}
+      - {device_id: AA-0D-03-4F-C9-9E-BA-36, device_type: IHD}
+  - mpxn: '1234567891014'
+    device_id: 08-00-00-00-00-00-08-01
+    device_type: ESME
+    ihd_mac: 684316522AFE909E
+    smso: Secure
+    post_code: TW2 6AE
+    address: "36,,PEMBRIDGE AVENUE,,,TWICKEN"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1234567891015', device_id: 08-00-00-00-00-00-08-02, device_type: GSME}
+      - {device_id: 08-00-00-00-00-00-08-03, device_type: GPF}
+      - {device_id: 08-00-00-00-00-00-08-04, device_type: CHF}
+      - {device_id: 68-43-16-52-2A-FE-90-9E, device_type: IHD}
+  - mpxn: '1234567891016'
+    device_id: 09-00-00-00-00-00-09-01
+    device_type: ESME
+    ihd_mac: CE8B05CBAB06E857
+    smso: Secure
+    post_code: B34 6RQ
+    address: "19,POLESWORTH GROVE,BIRMINGHAM"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1234567891017', device_id: 09-00-00-00-00-00-09-02, device_type: GSME}
+      - {device_id: 09-00-00-00-00-00-09-03, device_type: GPF}
+      - {device_id: 09-00-00-00-00-00-09-04, device_type: CHF}
+      - {device_id: CE-8B-05-CB-AB-06-E8-57, device_type: IHD}
+  - mpxn: '1234567891018'
+    device_id: 10-00-00-00-00-00-10-01
+    device_type: ESME
+    ihd_mac: 745963A1417F8BAD
+    smso: Secure
+    post_code: SP9 7RA
+    address: "9,MALMESBURY HOUSE,WYLYE ROAD,"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1234567891019', device_id: 10-00-00-00-00-00-10-02, device_type: GSME}
+      - {device_id: 10-00-00-00-00-00-10-03, device_type: GPF}
+      - {device_id: 10-00-00-00-00-00-10-04, device_type: CHF}
+      - {device_id: 74-59-63-A1-41-7F-8B-AD, device_type: IHD}
+  - mpxn: '1234567891020'
+    device_id: 11-00-00-00-00-00-11-01
+    device_type: ESME
+    ihd_mac: BD013A256F3F6DF2
+    smso: Secure
+    post_code: TN3 9QP
+    address: "6 THE CRESCENT,,WITHYHAM ROAD,"
+    consent: True
+    has_tariff: False
+    han_devices:
+      - {mpxn: '1234567891021', device_id: 11-00-00-00-00-00-11-02, device_type: GSME}
+      - {device_id: 11-00-00-00-00-00-11-03, device_type: GPF}
+      - {device_id: 11-00-00-00-00-00-11-04, device_type: CHF}
+      - {device_id: BD-01-3A-25-6F-3F-6D-F2, device_type: IHD}
+  - mpxn: '2298796593322'
+    device_id: 12-00-00-00-00-00-12-01
+    device_type: ESME
+    smso: DCC
+    post_code: SL4 5AR
+    address: "99,CLARENCE ROAD,WINDSOR,BERKS"
+    han_devices:
+      - {mpxn: '176402404', device_id: 12-00-00-00-00-00-12-02, device_type: GSME}
+      - {device_id: 12-00-00-00-00-00-12-03, device_type: GPF}
+      - {device_id: 12-00-00-00-00-00-12-04, device_type: CHF}
+  - mpxn: '1234000331371'
+    device_id: 43-EC-D4-5E-C4-6C-19-47
+    device_type: ESME
+    ihd_mac: BB7CCE647B9D9B6F
+    smso: DCC
+    post_code: SW1A 2AA
+    address: "10,,DOWNING ST,,,LONDON"
+  - mpxn: '1240008655466'
+    device_id: DF-9F-02-1A-E7-47-E7-54
+    device_type: GSME
+    ihd_mac: 4302BABA88B0A65B
+    smso: DCC
+    post_code: NW1 6XE
+    address: "221B,,BAKER ST,,,LONDON"
+  - mpxn: '1620784566716'
+    device_id: 1620784566716_E24SUP00001
+    device_type: ESME
+    smso: SMS
+    post_code: SA5 9AB
+    address: "70,,HEOL HERMAS,,PENLAN,SWANSEA"
+  - mpxn: '2279216339362'
+    device_id: 2279216339362_E24SUP00002
+    device_type: ESME
+    smso: SMS
+    post_code: PL15 7DH
+    address: "9,,RANCH VIEW,,,LAUNCESTON,COR"
+  - mpxn: '2597464686787'
+    device_id: 2597464686787_E24SUP00003
+    device_type: ESME
+    smso: SMS
+    post_code: EN9 1UP
+    address: "142,ROUNDHILLS,WALTHAM ABBEY,E"
+  - mpxn: '3102048446095'
+    device_id: 3102048446095_E24SUP00004
+    device_type: ESME
+    smso: SMS
+    post_code: RG2 9PZ
+    address: "24,,MELROSE GARDENS,,ARBORFIEL"
+  - mpxn: '1824755645294'
+    device_id: 1824755645294_E24SUP00005
+    device_type: ESME
+    smso: SMS
+    post_code: WR5 2SD
+    address: "23,,KEREN DRIVE,BROCKHILL VILLAGE"
+  - mpxn: '590819807'
+    device_id: 590819807_G24P0000001
+    device_type: GSME
+    smso: SMS
+    post_code: SG12 0RZ
+    address: "48,,PAGE HILL,,,WARE,HERTFORDS"
+  - mpxn: '57358503'
+    device_id: 57358503_G24P0000002
+    device_type: GSME
+    smso: SMS
+    post_code: WS8 6JS
+    address: "76,,WATLING STREET,NEWTOWN,BROWN"
+  - mpxn: '342855709'
+    device_id: 342855709_G24P0000003
+    device_type: GSME
+    smso: SMS
+    post_code: M18 7HE
+    address: "3,,STAINTON AVENUE,,,MANCHESTER"
+  - mpxn: '195879800'
+    device_id: 195879800_G24P0000004
+    device_type: GSME
+    smso: SMS
+    post_code: PR5 0LD
+    address: "66,,GREGSON LANE,,HOGHTON,PRESTON"
+  - mpxn: '30950901'
+    device_id: 30950901_G24P0000005
+    device_type: GSME
+    smso: SMS
+    post_code: SE15 1EQ
+    address: "39,,MANOR GROVE,,,LONDON"
+# Separate fixture set published for POST /read-inventory (operationId ReadInventory).
+# These carry UPRNs, which the consented-data MPxNs above do not.
+sandbox_read_inventory:
+  - mpxn: '1100000000001'
+    device_id: 01-00-00-00-00-00-00-01
+    uprn: '110000001'
+    device_type: ESME
+    post_code: BB10 2NW
+    address: "13,,TORQUAY AVENUE,,,BURNLEY,LANCA"
+    han_devices:
+      - {mpxn: '1100000000002', device_id: 01-00-00-00-00-00-00-02, device_type: ESME_EXPORT}
+      - {mpxn: '1100000000003', device_id: 01-00-00-00-00-00-00-03, device_type: GSME}
+      - {device_id: 01-00-00-00-00-00-00-04, device_type: GPF}
+      - {device_id: 01-00-00-00-00-00-00-05, device_type: CHF}
+  - mpxn: '1100000000006'
+    device_id: 01-00-00-00-00-00-00-06
+    uprn: '220000001'
+    device_type: ESME
+    post_code: FY2 9JZ
+    address: "7,EDENVALE AVENUE,BISPHAM,BLACKPOO"
+    han_devices:
+      - {mpxn: '1100000000007', device_id: 01-00-00-00-00-00-00-07, device_type: ESME_EXPORT}
+      - {mpxn: '1100000000008', device_id: 01-00-00-00-00-00-00-08, device_type: GSME}
+      - {device_id: 01-00-00-00-00-00-00-09, device_type: GPF}
+      - {device_id: 01-00-00-00-00-00-00-10, device_type: CHF}
+  - mpxn: '1100000000011'
+    device_id: 01-00-00-00-00-00-00-11
+    uprn: '330000001'
+    device_type: ESME
+    post_code: TA3 5RZ
+    address: "CURVALION ORCHARD,,CURVALION ROAD"
+    han_devices:
+      - {mpxn: '1100000000012', device_id: 01-00-00-00-00-00-00-12, device_type: GSME}
+      - {device_id: 01-00-00-00-00-00-00-13, device_type: CPF}
+      - {device_id: 01-00-00-00-00-00-00-14, device_type: CHF}
+  - mpxn: '1100000000015'
+    device_id: 01-00-00-00-00-00-00-15
+    uprn: '440000001'
+    device_type: ESME_EXPORT
+    post_code: WR4 9HW
+    address: "5,,BORROWDALE DRIVE,,,WORCESTER"
+    han_devices:
+      - {mpxn: '1100000000016', device_id: 01-00-00-00-00-00-00-16, device_type: GSME}
+      - {device_id: 01-00-00-00-00-00-00-17, device_type: GPF}
+      - {device_id: 01-00-00-00-00-00-00-18, device_type: CHF}
+  - mpxn: '1100000000019'
+    device_id: 01-00-00-00-00-00-00-19
+    uprn: '550000001'
+    device_type: ESME
+    post_code: TN10 4NP
+    address: "17,,RIDGEWAY CRESCENT,,,TONBRIDGE"
+    han_devices:
+      - {device_id: 01-00-00-00-00-00-00-20, device_type: CHF}
+  - mpxn: '1100000000021'
+    device_id: 01-00-00-00-00-00-00-21
+    uprn: '660000001'
+    device_type: GSME
+    post_code: NP11 4SD
+    address: "3,PRICE'S SQUARE,BRIDGE STREET,NP"
+    han_devices:
+      - {device_id: 01-00-00-00-00-00-00-22, device_type: GPF}
+      - {device_id: 01-00-00-00-00-00-00-23, device_type: CHF}
+  - mpxn: '1100000000025'
+    device_id: 01-00-00-00-00-00-00-25
+    uprn: '770000001'
+    device_type: ESME
+    post_code: SO45 6DW
+    address: "18,,VELSHEDA COURT,HYTHE MARINA CO"
+    han_devices:
+      - {device_id: 01-00-00-00-00-00-00-26, device_type: CHF}
+device_type_glossary:
+  ESME: Electricity Smart Metering Equipment (the electricity meter)
+  ESME_EXPORT: Export-registered electricity meter (generation / production)
+  GSME: Gas Smart Metering Equipment (the gas meter)
+  GPF: Gas Proxy Function
+  CPF: Communications Proxy Function
+  CHF: Communications Hub Function
+  IHD: In-Home Display
+  EXPORT: Export MPAN registered against the same physical meter
+
+smso_glossary:
+  DCC: Data Communications Company — the licensed GB smart-metering network
+  SMS: Smart Metering Systems (non-SMETS devices, change log 1.14)
+
+worked_examples:
+  - name: List the properties your sandbox key has consent for
+    operationId: RetrieveConsentedMPxNs
+    request: GET https://api-v2-sandbox.data.n3rgy.com/?startAt=0&maxResults=100
+    headers: {x-api-key: '<your sandbox key>'}
+  - name: Discover which utilities a demo property has
+    operationId: RetrieveConsentedMPxNUtilities
+    request: GET https://api-v2-sandbox.data.n3rgy.com/mpxn/1234567891000
+  - name: Pull half-hourly electricity consumption for a demo property
+    operationId: RetrieveDataForReadingType
+    request: >-
+      GET https://api-v2-sandbox.data.n3rgy.com/mpxn/1234567891000/utility/electricity/readingtype/consumption?start=20240101&end=20240102&granularity=halfhour
+  - name: Pull a tariff in RAW switching-table form
+    operationId: RetrieveDataForReadingType
+    request: >-
+      GET https://api-v2-sandbox.data.n3rgy.com/mpxn/1234567891000/utility/electricity/readingtype/tariff?outputFormat=raw
+    note: >-
+      Use an MPxN with has_tariff true. 1099999999990 and 1099999999981 have
+      has_tariff false and are the negative fixtures.
+  - name: Read the DCC device inventory for a demo property
+    operationId: ReadInventory
+    request: POST https://api-v2-sandbox.data.n3rgy.com/read-inventory
+    body: '{"mpxns": ["1100000000001"], "uprns": [], "deviceIds": []}'
+    note: >-
+      Use the sandbox_read_inventory fixtures, not the consented MPxNs. Do NOT
+      set last-communications or check-firmware in the sandbox.
+
+cross_references:
+  conventions: conventions/n3rgy-conventions.yml
+  errors: errors/n3rgy-problem-types.yml
+  rate_limits: rate-limits/n3rgy-rate-limits.yml
+  authentication: authentication/n3rgy-authentication.yml

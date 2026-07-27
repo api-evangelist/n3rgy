@@ -1,0 +1,31 @@
+generated: '2026-07-27'
+method: generated
+source: >-
+  Packaged Agent Skills generated from
+  openapi/n3rgy-customer-service-api-v2-openapi.yaml and the developer guide at
+  https://customer-api-user-manuals.data.n3rgy.com/. Every operationId in every
+  skill was verified verbatim in the spec; cross-cutting rules cite
+  ../conventions/, ../errors/, ../rate-limits/, ../authentication/ and
+  ../sandbox/. n3rgy publishes no AGENTS.md or skill files of its own.
+description: >-
+  Four marquee flows for the n3rgy Customer Service API V2, each written so an
+  agent handles the two things this API punishes: the consent gate that returns
+  403 rather than empty data, and the quota-consuming operations where a blind
+  retry costs the caller real capacity.
+skills:
+  - file: n3rgy-pull-property-consumption.md
+    name: Pull half-hourly consumption for a consented property
+    api: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+    operations: [RetrieveConsentedMPxNs, RetrieveConsentedMPxNUtilities, RetrieveDataTypesForUtility, RetrieveDataForReadingType]
+  - file: n3rgy-fix-never-update-frequency.md
+    name: Unblock a property whose update frequencies are set to never
+    api: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+    operations: [RetrieveDataUpdateFrequencies, RetrieveMPxNAvailability, SetMeterUpdateFrequency, SetDefaults, ResetAllUpdateFrequencies]
+  - file: n3rgy-check-estate-inventory.md
+    name: Run a DCC device inventory across a portfolio of properties
+    api: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+    operations: [ReadInventory, RetrieveMPxNAvailability, mpxnFromAddress]
+  - file: n3rgy-subscribe-push-notifications.md
+    name: Subscribe to push notifications instead of polling
+    api: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+    operations: [GetPushNotificationConfiguration, EditPushNotificationConfiguration, DeletePushNotificationConfiguration, RetrievePushNotificationStatus]

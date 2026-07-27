@@ -1,0 +1,114 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  https://customer-api-user-manuals.data.n3rgy.com/ (Overview),
+  https://customer-api-user-manuals.data.n3rgy.com/change-log/,
+  https://customer-api-user-manuals.data.n3rgy.com/sandbox-ReadInventory/,
+  https://github.com/n3rgy (organisation profile); deprecated operations
+  cross-checked against openapi/n3rgy-customer-service-api-v2-openapi.yaml.
+description: >-
+  n3rgy versions the Customer Service API by HOST (api-v2.data.n3rgy.com), ships a
+  dated-by-release-number change log inside the developer guide, and has actually
+  executed two retirements — the whole V1 API and the standalone consumer API.
+  What it does NOT publish is a formal deprecation POLICY document, an SLA, or a
+  status page.
+
+versioning:
+  scheme: major-version-in-hostname
+  current: V2
+  live_host: https://api-v2.data.n3rgy.com
+  sandbox_host: https://api-v2-sandbox.data.n3rgy.com
+  spec_version: '1.0'
+  spec_file: customer-service-api-v2-spec-1.0.yaml
+  docs: https://customer-api-user-manuals.data.n3rgy.com/
+  release_numbering: >-
+    The change log runs two numbering series: documentation revisions 1.0-1.17,
+    then platform releases 2.33.0-2.70.0 (semver-shaped, undated).
+  notes: >-
+    No Accept-version header, no date-pinned version, no path version prefix. A
+    client is pinned by the hostname it calls.
+
+deprecation:
+  policy_url: null
+  policy_published: false
+  docs: https://customer-api-user-manuals.data.n3rgy.com/
+  changelog: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  sunset_header: false
+  rfc8594: false
+  mechanism: >-
+    n3rgy announces deprecation in the developer-guide Overview and change log,
+    and — for the superseded endpoint form — by injecting a warning MESSAGE into
+    the response body of the deprecated endpoint rather than by an RFC 8594
+    Sunset/Deprecation header.
+  quote: >-
+    "For the current endpoints /{mpxn}/{utility}/{reading type}/{element} there
+    will be no changes, except for a message included in the response, alerting
+    the user that the endpoint will be deprecated. The previous endpoint will be
+    replaced by a new one: /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}."
+    — developer guide Overview
+  events:
+    - item: Legacy reading endpoint form /{mpxn}/{utility}/{reading type}/{element}
+      status: deprecated
+      superseded_by: /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}
+      operationId: RetrieveDataForReadingType
+      signal: in-body deprecation message
+      evidence: developer guide Overview
+    - item: Customer Service API V1
+      status: removed
+      evidence: change log entry 2.40.1 "Document V1 removal and readings fix"
+    - item: V1 Sandbox
+      status: deprecated
+      evidence: >-
+        "Please note that V1 Sandbox is deprecated, please contact Support" —
+        /sandbox-ReadInventory/
+    - item: Consumer API (consumer-api.data.n3rgy.com)
+      status: withdrawn
+      evidence: >-
+        github.com/n3rgy organisation bio — "unfortunately the consumer API is
+        not longer available (it's a regulatory thing). We hope to have an update
+        soon." The host still answers HTTP 401 {"message":"Unauthorized"}.
+      replacement: Web Consumer Portal only (https://data.n3rgy.com/consumer-login)
+    - item: Consumer Portal self-service signup
+      status: closed
+      date: '2024-10-01'
+      evidence: >-
+        support.n3rgy.com knowledge-base article "Consumer Portal signup is Closed
+        from the 1st October 2024"
+    - item: create-export-profiles
+      status: legacy
+      operationId: CreateExportProfiles
+      evidence: >-
+        OpenAPI summary — "Creates export profiles on the V1 solution."; retained
+        in the V2 contract but targets the retired V1 platform.
+
+deprecated_operations: []
+deprecated_operations_note: >-
+  No operation in openapi/n3rgy-customer-service-api-v2-openapi.yaml carries
+  `deprecated: true`. The deprecations above are documented in prose and in
+  response bodies, not in the machine-readable contract — a real gap.
+
+sla:
+  url: null
+  uptime_target: null
+  published: false
+  notes: >-
+    No SLA, uptime target or availability commitment is published on the developer
+    guide or the business page. Commercial terms are in the n3rgy Data Limited
+    terms of service PDF and are arranged per contract.
+
+status_page: null
+status_page_probed:
+  - {url: 'https://status.n3rgy.com', result: DNS does not resolve}
+notes_status: >-
+  n3rgy operates no public status page. Incidents are handled through the
+  Freshdesk support portal at https://support.n3rgy.com/support/home.
+
+support:
+  help_center: https://support.n3rgy.com/support/home
+  knowledge_base: https://support.n3rgy.com/support/solutions
+  ticket: https://support.n3rgy.com/tickets/new
+  contact: https://www.n3rgy.com/contact-us/
+  email: support@n3rgy.com
+
+changelog: changelog/n3rgy-changelog.yml
+rate_limits: rate-limits/n3rgy-rate-limits.yml

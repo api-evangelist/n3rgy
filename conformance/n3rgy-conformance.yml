@@ -1,0 +1,179 @@
+generated: '2026-07-27'
+method: derived
+source: >-
+  Derived from openapi/n3rgy-customer-service-api-v2-openapi.yaml
+  (securitySchemes, error schemas, pagination parameters, vocabulary) and the
+  developer guide at https://customer-api-user-manuals.data.n3rgy.com/; live
+  /.well-known/ probes recorded in well-known/n3rgy-well-known.yml.
+description: >-
+  Which cross-cutting and industry standards the n3rgy Customer Service API V2
+  actually conforms to. The headline result is that n3rgy implements NO energy
+  data standard: the contract is a proprietary schema expressed in Great Britain
+  smart-metering vocabulary. It sits ON TOP of a mandated infrastructure (DCC /
+  Smart Energy Code / SMETS2), which is a supply-chain conformance, not an API
+  conformance. No published certification programme (SOC 2, ISO 27001, PCI DSS,
+  HIPAA, FedRAMP) was found on any n3rgy surface, so NO Compliance pointer is
+  emitted.
+compliance_program_published: false
+certifications_found: []
+
+standards:
+  # ---- security / auth ----
+  - id: api-key-auth
+    conforms: true
+    evidence: >-
+      openapi securitySchemes.ApiKeyAuth = {type: apiKey, in: header, name:
+      x-api-key}; applied to 25 of 26 operations.
+  - id: oauth2
+    conforms: false
+    evidence: >-
+      No oauth2 securityScheme in the OpenAPI; no
+      /.well-known/oauth-authorization-server on any host (all 404 or SPA shell).
+  - id: oidc
+    conforms: false
+    evidence: >-
+      No openIdConnect securityScheme; /.well-known/openid-configuration returns
+      401 on consumer-api.data.n3rgy.com and an HTML SPA shell on
+      data.n3rgy.com — no discovery document is served anywhere.
+  - id: fapi
+    conforms: false
+    evidence: No OAuth/OIDC at all, so no FAPI profile is possible.
+  - id: mtls
+    conforms: false
+    evidence: No mutualTLS securityScheme declared.
+  - id: rfc9116-security-txt
+    conforms: false
+    evidence: >-
+      /.well-known/security.txt returns 404 on both API hosts and on
+      www.n3rgy.com; see well-known/n3rgy-well-known.yml.
+  - id: hsts
+    conforms: partial
+    evidence: >-
+      data.n3rgy.com and customer-api-user-manuals.data.n3rgy.com send HSTS with
+      max-age 31536000; www.n3rgy.com sends none. See
+      security/n3rgy-domain-security.yml.
+  - id: dnssec
+    conforms: false
+    evidence: n3rgy.com is not DNSSEC signed (probed 2026-07-27).
+  - id: dmarc
+    conforms: false
+    evidence: No DMARC record on n3rgy.com; SPF is present.
+
+  # ---- API design / HTTP ----
+  - id: openapi-3
+    conforms: true
+    evidence: >-
+      OpenAPI 3.0.1 published at
+      https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml
+      — 26 operations, 47 component schemas, two servers.
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: >-
+      Errors are application/json with a proprietary {"errors":[{"code","message"}]}
+      or flat {"message"} envelope. No application/problem+json, no type URIs.
+      See errors/n3rgy-problem-types.yml.
+  - id: idempotency-keys
+    conforms: false
+    evidence: >-
+      No Idempotency-Key header or parameter anywhere in the spec or the docs.
+      Retry safety rests on HTTP verb semantics only. See
+      conventions/n3rgy-conventions.yml.
+  - id: pagination
+    conforms: true
+    evidence: >-
+      Offset pagination on RetrieveConsentedMPxNs — startAt / maxResults with
+      total + entries in the response body (default and maximum page size 100).
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: >-
+      Deprecation is signalled by prose in the developer guide and by a message
+      injected into the response body, not by Sunset/Deprecation headers. See
+      lifecycle/n3rgy-lifecycle.yml.
+  - id: rate-limit-headers
+    conforms: false
+    evidence: >-
+      429 is returned with an explanatory body but no Retry-After or
+      X-RateLimit-* headers are documented. See rate-limits/n3rgy-rate-limits.yml.
+  - id: json-api
+    conforms: false
+    evidence: Proprietary response envelope (resource / responseTimestamp / entries).
+  - id: odata
+    conforms: false
+  - id: scim
+    conforms: false
+  - id: graphql
+    conforms: false
+    evidence: No GraphQL surface exists; no /graphql endpoint on any host.
+  - id: grpc
+    conforms: false
+    evidence: No .proto published; no gRPC surface.
+  - id: asyncapi
+    conforms: false
+    evidence: >-
+      A real push-notification surface exists but no AsyncAPI document is
+      published. See asyncapi/n3rgy-push-notifications-webhooks.yml.
+  - id: webhooks
+    conforms: partial
+    evidence: >-
+      Push Notification is a genuine webhook surface (configure a URI, subscribe
+      esme/gsme utility types, read delivery status) but with no payload schema,
+      no signing scheme and no retry policy published.
+
+  # ---- energy / metering domain ----
+  - id: gb-smets2
+    conforms: true
+    evidence: >-
+      The contract's whole vocabulary is SMETS2: ESME, GSME, GPF, CPF, CHF, IHD,
+      HAN, MPxN, GBCS version, SMETS/CHTS version, switching tables and TOU/block
+      tariff matrices read straight off the meter.
+  - id: gb-dcc-sec
+    conforms: true
+    evidence: >-
+      Read Inventory returns "DCC's device inventory (device data and WAN matrix)"
+      and SMSO is enumerated as DCC or Secure — n3rgy consumes the licensed DCC
+      network on the customer's behalf so the customer need not be a DCC User.
+    caveat: >-
+      n3rgy's own about-us page does NOT state a DCC "Other User" or SEC Party
+      role; that framing appears only in third-party commentary and is therefore
+      UNVERIFIED from first-party sources.
+  - id: green-button-espi
+    conforms: false
+    evidence: No Green Button / NAESB ESPI reference anywhere in the spec or docs.
+  - id: cdr-energy
+    conforms: false
+    evidence: >-
+      Great Britain has no Consumer Data Right. n3rgy is not an accredited data
+      recipient under any consumer data-portability regime.
+  - id: iec-cim-61968
+    conforms: false
+  - id: ieee-2030-5
+    conforms: false
+  - id: openadr
+    conforms: false
+  - id: ocpp-ocpi
+    conforms: false
+  - id: uk-open-banking-obie
+    conforms: false
+    evidence: Not a financial API; no OBIE/PSD2 relevance.
+
+  # ---- privacy / consent ----
+  - id: consent-gated-access
+    conforms: true
+    evidence: >-
+      Every data-bearing operation validates that an ACTIVE consent exists for the
+      HAN behind the supplied MPxN; absent consent returns 403 "Consent for the
+      given MPxN not found." Consent is granted and withdrawn by the occupant in
+      the n3rgy Consumer Portal, not by the API caller.
+  - id: gdpr-uk
+    conforms: unknown
+    evidence: >-
+      A privacy policy is published at https://www.n3rgy.com/privacy/ and the
+      platform is UK-domiciled and consent-based, but n3rgy publishes no explicit
+      UK GDPR compliance statement or DPA on its developer surface.
+
+summary:
+  machine_readable_contract: OpenAPI 3.0.1
+  auth_standard: API key header only — no OAuth, no OIDC
+  error_standard: proprietary (not RFC 9457)
+  energy_data_standard: none — proprietary schema in GB SMETS2 vocabulary
+  certifications_published: none found

@@ -1,0 +1,44 @@
+generated: '2026-07-27'
+method: searched
+source: >-
+  Request and response examples published verbatim in the n3rgy Customer Service
+  API V2 developer guide at
+  https://customer-api-user-manuals.data.n3rgy.com/requests/. The harvested
+  OpenAPI declares 47 component schemas but carries no inline `example` or
+  `examples` for any of them, so these are the only worked payloads n3rgy
+  publishes.
+examples:
+  - file: n3rgy-retrieve-consented-mpxns-example.json
+    operationId: RetrieveConsentedMPxNs
+    kind: response
+    status: 200
+    label: Customer has active consents
+  - file: n3rgy-retrieve-consented-mpxns-empty-example.json
+    operationId: RetrieveConsentedMPxNs
+    kind: response
+    status: 200
+    label: Customer has NO active consents
+  - file: n3rgy-error-forbidden-example.json
+    operationId: any
+    kind: response
+    status: 403
+    label: Absent or invalid API key (the dominant error envelope)
+  - file: n3rgy-error-bad-request-example.json
+    operationId: RetrieveConsentedMPxNs
+    kind: response
+    status: 400
+    label: Query-parameter validation failure
+  - file: n3rgy-push-configuration-request-example.json
+    operationId: EditPushNotificationConfiguration
+    kind: request
+    label: Set the push endpoint and both device-type subscription lists
+  - file: n3rgy-push-configuration-response-example.json
+    operationId: GetPushNotificationConfiguration
+    kind: response
+    status: 200
+    label: Current push configuration
+  - file: n3rgy-push-status-response-example.json
+    operationId: RetrievePushNotificationStatus
+    kind: response
+    status: 200
+    label: Most recent push delivery outcome
