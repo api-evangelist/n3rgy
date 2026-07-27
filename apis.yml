@@ -1,0 +1,106 @@
+aid: n3rgy
+url: https://raw.githubusercontent.com/api-evangelist/n3rgy/refs/heads/main/apis.yml
+name: n3rgy
+kind: company
+description: >-
+  n3rgy data limited is a United Kingdom smart-energy data platform, registered in England
+  (No. 11712674) and owned by Smart Metering Systems Ltd. It sits between Great Britain's
+  mandated smart-metering infrastructure — the DCC network, SMETS2 home area networks (HANs),
+  and the ESME/GSME electricity and gas meters behind them — and the organisations that want
+  to read from it, letting a business collect consumption, production, and tariff data for a
+  property (addressed by MPAN/MPRN, collectively MPxN) once the occupant has granted consent,
+  without that business having to become a DCC user in its own right. Its API posture is public
+  in documentation and closed in access: a genuinely anonymous MkDocs developer guide and a
+  complete OpenAPI 3.0.1 contract for the Customer Service API V2 are served to anyone, while
+  every operation is x-api-key gated and live keys must be enabled by the n3rgy back office
+  after a business sign-up. Britain mandated the metering infrastructure, not a consumer data
+  right, so nothing here is a Consumer Data Right or Green Button implementation — n3rgy
+  publishes no open grid or market data at all, and the formerly public consumer API is,
+  by the company's own statement, no longer available.
+image: https://www.n3rgy.com/wp-content/uploads/2023/03/Group.png
+tags:
+- Energy
+- United Kingdom
+- Utilities
+- Smart Metering
+- Electricity
+- Gas
+- Smart Meter Data
+- Consent
+- Metering
+- Energy Data
+created: '2026-07-27'
+modified: '2026-07-27'
+specificationVersion: '0.19'
+apis:
+- aid: n3rgy:customer-service-api-v2
+  name: n3rgy Customer Service API V2
+  description: >-
+    The consent-scoped smart-meter data API of the n3rgy platform. A business holding a valid
+    n3rgy API key lists the properties (MPxNs) it has active consent for, discovers which
+    utilities (electricity, gas) and reading types (consumption, production, tariff) are
+    available for each, and retrieves the underlying half-hourly data. The same contract also
+    covers meter update-frequency control, MPxN and address lookup, read-inventory / firmware
+    and last-communications checks, on-demand "update now" fetches, push-notification
+    configuration, and an upload/devices surface for non-DCC device data. Every operation is
+    secured with the x-api-key header; consent-bearing operations additionally validate that
+    an active consent exists for the HAN behind the given MPxN. A free sandbox with
+    demonstration MPxNs mirrors the live contract on a separate host.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Smart Metering
+  - Consumption
+  - Tariff
+  - Consent
+  - Electricity
+  - Gas
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+common:
+- type: Website
+  url: https://www.n3rgy.com/
+- type: Documentation
+  url: https://customer-api-user-manuals.data.n3rgy.com/
+- type: SignUp
+  url: https://data.n3rgy.com/business-sign-up
+- type: Login
+  url: https://www.n3rgy.com/business-login/
+- type: Portal
+  url: https://data.n3rgy.com/consumer-login
+- type: Pricing
+  url: https://www.n3rgy.com/business/
+- type: TermsOfService
+  url: https://www.n3rgy.com/wp-content/uploads/2023/04/N3rgyDataLimited.pdf
+- type: PrivacyPolicy
+  url: https://www.n3rgy.com/privacy/
+- type: Support
+  url: https://www.n3rgy.com/contact-us/
+- type: About
+  url: https://www.n3rgy.com/about-us/
+- type: GitHubOrganization
+  url: https://github.com/n3rgy
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

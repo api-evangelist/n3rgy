@@ -1,0 +1,311 @@
+aid: n3rgy
+name: n3rgy
+review:
+  question: >-
+    Does n3rgy publish a real, documented, downloadable API contract for smart-meter data in
+    Great Britain, and is any energy data mandate actually implemented behind it?
+  answer: true
+  date: '2026-07-27'
+  reviewer: API Evangelist
+  homeMarket: United Kingdom
+  tier: energy-data-platform
+findings:
+  summary: |
+    n3rgy data limited is a GB smart-meter data platform owned by Smart Metering Systems Ltd
+    (registered in England No. 11712674). It publishes a fully public, anonymously readable
+    developer guide (MkDocs Material) at customer-api-user-manuals.data.n3rgy.com and, from
+    that guide's Swagger UI page, a complete OpenAPI 3.0.1 document for the "Customer Service
+    API V2" — 26 operations, 47 component schemas, live and sandbox servers. The contract was
+    downloaded verbatim (HTTP 200, application/yaml, 85,443 bytes) and parses.
+
+    Access is another matter. Both declared servers answer anonymously with HTTP 403 from AWS
+    API Gateway, and the docs state plainly that "Access to the Customer Service API must be
+    enabled for the user's live API key by the n3rgy data backoffice." The business page
+    describes a free sandbox first, then a paid upgrade arranged by contacting the company.
+    So: documentation open, contract open, data closed.
+
+    The formerly public n3rgy consumer API (consumer-api.data.n3rgy.com, historically
+    authenticated with an IHD MAC address, widely wrapped by community clients) is no longer
+    offered. The host still resolves and answers HTTP 401 {"message":"Unauthorized"} from API
+    Gateway, but n3rgy's own GitHub organisation profile states: "unfortunately the consumer
+    API is not longer available (it's a regulatory thing). We hope to have an update soon."
+    The org has 0 public repositories; github.com/n3rgy/data — still linked from n3rgy's own
+    business page — is HTTP 404.
+mandate:
+  regime: smart-meter-infrastructure
+  regimeDetail: |
+    Great Britain mandated the INFRASTRUCTURE, not a consumer data right. The Smart Metering
+    Implementation Programme, the licensed Data Communications Company (DCC), and the Smart
+    Energy Code govern who may reach a SMETS2 meter. There is no GB analogue of the Australian
+    Consumer Data Right and no GB equivalent of Ontario's Green Button regulation. n3rgy is not
+    an obligated data holder under any consumer data-portability rule; it is a commercial
+    managed-service layer that lets a business read consented smart-meter data without itself
+    holding DCC User / SEC Party status.
+  status: live-implemented
+  statusEvidence: |
+    What is verified as LIVE is n3rgy's own implementation on top of the mandated infrastructure,
+    NOT a mandated consumer data API — GB has no such mandate to implement. Specifically verified
+    on 2026-07-27:
+      - OpenAPI 3.0.1 contract fetched and parsed (HTTP 200):
+        https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml
+      - Declared live server https://api-v2.data.n3rgy.com  -> HTTP 403 (AWS API Gateway,
+        real gated host, not a parked domain)
+      - Declared sandbox server https://api-v2-sandbox.data.n3rgy.com -> HTTP 403
+      - Legacy consumer host https://consumer-api.data.n3rgy.com/electricity/consumption/1
+        -> HTTP 401, content-type application/json, body {"message":"Unauthorized"},
+        x-amzn-errortype: UnauthorizedException
+    The contract's domain model (MPxN = MPAN/MPRN, HAN, ESME/GSME, CIN, consent status, meter
+    update frequency) is GB SMETS2/DCC vocabulary, which is what ties this platform to the
+    infrastructure mandate.
+  statusCaveats: |
+    NOT claimed: that any regulator obliges n3rgy to publish this API; that n3rgy is a CDR-style
+    accredited recipient; that the consumer API is available. n3rgy's own about-us page does NOT
+    state a DCC "Other User" or SEC Party role — that framing comes only from third-party
+    commentary and is therefore recorded here as UNVERIFIED from first-party sources. No CDR
+    register entry, no Green Button certification, and no standards-conformance claim of any
+    kind was found on n3rgy's site.
+  dataStandard: >-
+    No standard reference found. The Customer Service API V2 is a proprietary n3rgy schema
+    expressed in GB smart-metering vocabulary (MPxN, HAN, ESME/GSME, half-hourly consumption /
+    production / tariff reading types). No Green Button / ESPI, no CDR Consumer Data Standards
+    (energy), no IEC CIM 61968/61970, no IEEE 2030.5, no OpenADR, no OCPP/OCPI reference appears
+    anywhere in the specification or the developer guide.
+  consumerDataApi: true
+  consumerDataApiDetail: |
+    TRUE, but gated twice over. A third party can obtain an individual property's usage, export
+    (production) and tariff data through a documented API — GET /mpxn/{mpxn}/utility/{utility}/
+    readingtype/{readingType} — provided (a) it holds an n3rgy-issued API key enabled by the
+    back office, and (b) an ACTIVE CONSENT record exists for the HAN behind that MPxN. Without
+    consent the endpoint returns 403 "Consent for the given MPxN not found." Individual
+    consumers themselves now have only the web Consumer Portal (data.n3rgy.com/consumer-login)
+    to view, download, and withdraw consents — the direct consumer API is withdrawn.
+  marketDataOpen: false
+  marketDataOpenDetail: |
+    FALSE. n3rgy publishes no anonymous grid, system or market data of any kind — no generation
+    mix, no settlement, no carbon intensity, no network data. That is a different part of the GB
+    stack entirely (NESO's Carbon Intensity API, Elexon's BMRS/Insights, DNO open-data portals).
+    n3rgy's whole product is per-property, per-consent customer data. The split is therefore
+    stark and one-sided: consumer data yes (gated), market data none.
+  accessGate: application-approval
+  accessGateDetail: |
+    Exactly what a developer must do, from n3rgy's own pages:
+      1. Read the developer guide anonymously — no login required
+         (https://customer-api-user-manuals.data.n3rgy.com/, HTTP 200).
+      2. Complete the business sign-up form at https://data.n3rgy.com/business-sign-up
+         (HTTP 200) to get onto the free Sandbox tier, which ships "thousands of demonstration
+         properties" and fixed sandbox MPxNs.
+      3. Contact n3rgy to upgrade to full user status. The Authentication page states:
+         "Access to the Customer Service API must be enabled for the user's live API key by the
+         n3rgy data backoffice."
+      4. Obtain end-customer consent per property before any consent-bearing endpoint will
+         return data.
+    Pricing tiers are published on the business page (Standard / Scale / Volume, per-property
+    annual + tiered monthly), but no self-serve checkout and no self-issued key exists. This is
+    a form-then-review gate, not self-serve.
+  authModel: |
+    API key in a header. securitySchemes.ApiKeyAuth = {type: apiKey, in: header, name: x-api-key,
+    x-amazon-apigateway-api-key-source: HEADER}. All 26 operations declare ApiKeyAuth except
+    POST /internal/{mpxn}/{utility}/{readingType}, which declares an empty security array. The
+    docs note the migration in n3rgy data 2.0 from the old Authorization header to x-api-key.
+    Consent status is a second, server-side authorisation layer on top of the key. No OAuth2 and
+    no OpenID Connect: https://consumer-api.data.n3rgy.com/.well-known/openid-configuration
+    returned HTTP 401 (gateway authorizer, no discovery document) and
+    https://data.n3rgy.com/.well-known/openid-configuration returned the Angular SPA shell
+    (HTTP 200, content-type text/html) rather than a discovery document — i.e. no OIDC is served.
+  homeMarket: United Kingdom
+apiFamily:
+  segmentation: |
+    The contract is not tagged, so the segmentation below is the one the developer guide's own
+    navigation and endpoint naming uses.
+  segments:
+    - name: Consent & property discovery
+      operations:
+        - GET / (RetrieveConsentedMPxNs)
+        - GET /mpxn/{mpxn} (RetrieveConsentedMPxNUtilities)
+        - GET /mpxn/{mpxn}/utility/{utility} (RetrieveDataTypesForUtility)
+        - GET /find-mpxn/{identifier} (RetrieveMPxNAvailability)
+        - GET /find-mpxn/{identifier}/{address} (mpxnFromAddress)
+    - name: Usage, export and tariff data
+      operations:
+        - GET /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType} (RetrieveDataForReadingType)
+        - GET /update-now/mpxn/{mpxn}/utility/{utility}/readingtype/{readingType} (generateFetchNowRequest)
+      note: >-
+        readingType is one of consumption, production, tariff; utility is electricity or gas.
+        The deprecated form /{mpxn}/{utility}/{reading type}/{element} is replaced by
+        /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}.
+    - name: Meter update frequency control
+      operations:
+        - PUT /set-meter-update-frequency (SetMeterUpdateFrequency)
+        - GET /get-update-frequencies/{mpxn} (RetrieveDataUpdateFrequencies)
+        - PUT /set-defaults (SetDefaults)
+        - PUT /reset-all-update-frequencies (ResetAllUpdateFrequencies)
+    - name: Estate / device health
+      operations:
+        - POST /read-inventory (ReadInventory)
+        - POST /create-export-profiles (CreateExportProfiles)
+    - name: Third-party device data upload
+      operations:
+        - POST /upload/devices/ (addDevice)
+        - GET /upload/devices/ (listDevices)
+        - GET /upload/devices/deviceid/{deviceId} (getDevice)
+        - PUT /upload/devices/deviceid/{deviceId} (updateDevice)
+        - DELETE /upload/devices/deviceid/{deviceId} (deleteDevice)
+        - POST /upload/data/deviceid/{deviceId}/readingtype/{readingType} (uploadData)
+        - DELETE /upload/data/deviceid/{deviceId}/readingtype/{readingType}/starttime/{startTime}/endtime/{endTime} (deleteData)
+    - name: Push notifications
+      operations:
+        - GET /push/configuration (GetPushNotificationConfiguration)
+        - POST /push/configuration (EditPushNotificationConfiguration)
+        - DELETE /push/configuration (DeletePushNotificationConfiguration)
+        - GET /push/status (RetrievePushNotificationStatus)
+    - name: Internal
+      operations:
+        - GET /internal/{mpxn}/{utility}/{readingType} (RetrievePropertyElements)
+        - POST /internal/{mpxn}/{utility}/{readingType} (RetrieveReadingTypeData)
+artifacts:
+  - path: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+    type: OpenAPI
+    specVersion: 3.0.1
+    title: Customer Service API V2
+    version: '1.0'
+    sourceURL: https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml
+    fetched: '2026-07-27'
+    httpStatus: 200
+    contentType: application/yaml
+    bytes: 85443
+    parses: true
+    operations: 26
+    schemas: 47
+    servers:
+      - https://api-v2.data.n3rgy.com
+      - https://api-v2-sandbox.data.n3rgy.com
+    note: >-
+      Saved verbatim. Discovered by reading the SwaggerUIBundle initialisation on
+      https://customer-api-user-manuals.data.n3rgy.com/api-specification/ where
+      url: 'customer-service-api-v2-spec-1.0.yaml'. Contains AWS
+      x-amazon-apigateway-integration extensions, left untouched.
+probes:
+  - url: https://n3rgy.com
+    status: 200
+    note: redirects to https://www.n3rgy.com/
+  - url: https://www.n3rgy.com/
+    status: 200
+  - url: https://www.n3rgy.com/business/
+    status: 200
+    note: pricing tiers (Standard / Scale / Volume), sandbox described as free
+  - url: https://www.n3rgy.com/consumer/
+    status: 200
+    note: consumer portal only, no consumer API mentioned
+  - url: https://www.n3rgy.com/about-us/
+    status: 200
+    note: "owned by Smart Metering Systems Ltd; Registered in England No. 11712674"
+  - url: https://data.n3rgy.com/
+    status: 200
+    note: Angular SPA; serves the same index.html for every path (verified — swagger.json and openapi.json both returned text/html, 814 bytes)
+  - url: https://data.n3rgy.com/business-sign-up
+    status: 200
+  - url: https://data.n3rgy.com/consumer-login
+    status: 200
+  - url: https://data.n3rgy.com/customer/api/documentation
+    status: 200
+    note: SPA route linked from the docs footer
+  - url: https://customer-api-user-manuals.data.n3rgy.com/
+    status: 200
+    note: PUBLIC developer portal, MkDocs Material 8.5.8, no auth
+  - url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+    status: 200
+    note: Swagger UI page hosting the OpenAPI
+  - url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml
+    status: 200
+    note: the OpenAPI contract, harvested
+  - url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-mpxns/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-authentication/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-ReadInventory/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+    status: 200
+  - url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+    status: 200
+    note: versions 1.0 through 2.70.0; V1 documented as removed
+  - url: https://api-v2.data.n3rgy.com/
+    status: 403
+    note: live server from the spec; AWS API Gateway denies anonymous callers
+  - url: https://api-v2-sandbox.data.n3rgy.com/
+    status: 403
+    note: sandbox server from the spec
+  - url: https://consumer-api.data.n3rgy.com/electricity/consumption/1
+    status: 401
+    note: legacy consumer API host still answers; {"message":"Unauthorized"} via API Gateway/CloudFront
+  - url: https://consumer-api.data.n3rgy.com/.well-known/openid-configuration
+    status: 401
+    note: no OIDC discovery served
+  - url: https://data.n3rgy.com/.well-known/openid-configuration
+    status: 200
+    note: FALSE POSITIVE — returns the SPA index.html (text/html), not a discovery document
+  - url: https://homebrew.n3rgy.com/data/
+    status: 200
+    note: n3rgy data Smart Meter Demonstrator
+  - url: https://github.com/n3rgy
+    status: 200
+    note: 0 public repositories; org bio states the consumer API is no longer available
+  - url: https://github.com/n3rgy/data
+    status: 404
+    note: dead link, still referenced from n3rgy's own business page
+  - url: https://api.n3rgy.com
+    status: 0
+    note: DNS does not resolve
+  - url: https://developer.n3rgy.com
+    status: 0
+    note: DNS does not resolve
+  - url: https://developers.n3rgy.com
+    status: 0
+    note: DNS does not resolve
+  - url: https://docs.n3rgy.com
+    status: 0
+    note: DNS does not resolve
+  - url: https://portal.n3rgy.com
+    status: 0
+    note: DNS does not resolve
+  - url: https://sandbox.n3rgy.com
+    status: 0
+    note: DNS does not resolve
+sources:
+  - url: https://customer-api-user-manuals.data.n3rgy.com/
+    type: Documentation
+    note: "Customer Service API Developer's Guide — the real, public developer portal."
+  - url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+    type: Documentation
+    note: "Quote: 'Access to the Customer Service API must be enabled for the user's live API key by the n3rgy data backoffice.' Header is x-api-key; consent status is validated separately."
+  - url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+    type: Documentation
+    note: "Reading types are consumption, production, tariff; utilities are electricity and gas; consent errors return 403 'Consent for the given MPxN not found.'"
+  - url: https://www.n3rgy.com/business/
+    type: Website
+    note: "Free Sandbox with thousands of demonstration properties; Standard / Scale / Volume pricing; upgrade by contacting the company."
+  - url: https://www.n3rgy.com/about-us/
+    type: Website
+    note: "'n3rgy is owned by Smart Metering Systems Ltd'; 'Registered in England No. 11712674'."
+  - url: https://github.com/n3rgy
+    type: GitHubOrganization
+    note: "Org bio: 'Data for Digital Energy Services, unfortunately the consumer API is not longer available (it's a regulatory thing). We hope to have an update soon.' 0 public repos."
+actions:
+  apisYmlCreated: true
+  readmeCreated: true
+  openapiHarvested: 1
+  githubRepoCreated: false
+  pushed: false
+  reason: |
+    Bootstrap only — identity, honest public-API capture, and one verbatim OpenAPI harvest.
+    Remote creation and enrichment are handled by separate paced processes.

@@ -1,0 +1,2269 @@
+openapi: 3.0.1
+info:
+  title: Customer Service API V2
+  description: Customer Service API V2.
+  version: "1.0"
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+  - url: "https://api-v2.data.n3rgy.com"
+    description: Live API
+  - url: "https://api-v2-sandbox.data.n3rgy.com"
+    description: Sandbox API
+paths:
+  /:
+    get:
+      operationId: RetrieveConsentedMPxNs
+      summary: "List consented mpxns"
+      description: "returns the consented mpxns for a given customer"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: startat
+          schema:
+            type: integer
+          description: "consented mpxns are returned from this number onwards"
+        - in: query
+          name: maxresults
+          schema:
+            type: integer
+          description: "the maximum number of mpxns to be returned for that request"
+      responses:
+        "200":
+          description: "success message for retrieving consented mpxns request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveConsentedMPxNsSuccessResponse"
+        "400":
+          description: "Bad request. There was an error while validating the request parameters."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ParamStartAtErrorResponse"
+                  - $ref: "#/components/schemas/ParamMaxResultsErrorResponse"
+        "403":
+          description: "Forbidden to access the endpoint."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+  /mpxn/{mpxn}:
+    get:
+      operationId: RetrieveConsentedMPxNUtilities
+      summary: List utilities for MPxN
+      description: "Returns the utilities list for the consented MPxN"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+          description: "The MPxN, which can be either an MPAN or MPRN."
+      responses:
+        "200":
+          description: "Success message for Retrieving Utilities request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveUtilitiesSuccessResponse"
+        "400":
+          description: "Bad request. There was an error while validating the request parameters."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: "Forbidden to access the endpoint or no consent found for the customer"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ConsentNotFoundResponse"
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+  /mpxn/{mpxn}/utility/{utility}:
+    get:
+      operationId: RetrieveDataTypesForUtility
+      summary: List types for utility in MPxN
+      description: "Returns the data types of an utility in a consented MPxN"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+          description: "The MPxN, which can be either an MPAN or MPRN."
+        - in: path
+          name: utility
+          required: true
+          schema:
+            type: string
+            example: "electricity"
+          description: "The utility type, which can be either electricity or gas."
+        - in: query
+          name: includeCheckMeter
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: "Indicates whether to include check meter information in the response."
+      responses:
+        "200":
+          description: "Success message for Retrieving Reading Types request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveReadingTypesSuccessResponse"
+        "400":
+          description: "The MPxN is in an invalid format or the utility has an invalid value"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: "Forbidden to access the endpoint or consent not found for the given MPxN"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ConsentNotFoundResponse"
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+        "404":
+          description: "No available information for the specified utility in the HAN associated with the received MPxN"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MPxNNotAssociatedWithAHANError"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+  /set-meter-update-frequency:
+    put:
+      operationId: SetMeterUpdateFrequency
+      summary: Set frequency
+      description: Sets the update frequencies for a specific meter in one of the consented HANs
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Body parameters to specify the Device ID of the target meter and the values for import/export update frequency
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetMeterUpdateFrequencyBody"
+      responses:
+        "200":
+          description: "Success message for Set Meter Update Frequency request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetMeterUpdateFrequencySuccessResponse"
+        "403":
+          description: "Forbidden to access the endpoint."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetMeterUpdateFrequencyForbiddenResponseList"
+        "400":
+          description: "Example of bad request response."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetMeterUpdateFrequencyBadRequestResponseList"
+        "404":
+          description: "Example of not found response."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetMeterUpdateFrequencyNotFoundResponseList"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /find-mpxn/{identifier}:
+    get:
+      operationId: RetrieveMPxNAvailability
+      summary: Find MPxN
+      description: "Returns the availability for consent of a device associated with the MPxN"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+          description: "The MPxN, which can be either an MPAN or MPRN."
+        - name: "checkAmr"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            example: true
+      responses:
+        "200":
+          description: "Success message for Retrieving Availability request."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - description: "Response when checkAmr is false or not provided"
+                    $ref: "#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse"
+                  - description: "Response when checkAmr is true (returns a list of objects)"
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse"
+        "400":
+          description: "Bad request. There was an error while validating the request parameters."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParamMPxNErrorResponse"
+        "403":
+          description: "Forbidden to access the endpoint."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        "404":
+          description: "There is no available information of meters associated with the received MPxN, or MPxN not associated with a HAN"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/NotFoundMpxnResponse"
+                  - $ref: "#/components/schemas/MPxNNotAssociatedWithAHANError"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /find-mpxn/{identifier}/{address}:
+    get:
+      operationId: mpxnFromAddress
+      summary: "Find MPxN by address"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: "identifier"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            example: "C2A+2EE"
+        - name: "address"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            example: "22A"
+        - name: "checkAmr"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            example: true
+      responses:
+        "200":
+          description: "Success message for Retrieving Availability request."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - description: "Response when checkAmr is false or not provided"
+                    $ref: "#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse"
+                  - description: "Response when checkAmr is false or not provided"
+                    type: "array"
+                    $ref: "#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse"
+        "400":
+          description: "Bad request. There was an error while validating the request parameters or more than a single HAN returned."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParamMPxNErrorResponse"
+        "403":
+          description: "Forbidden to access the endpoint."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        "404":
+          description: "There is no available information of meters associated with the received address."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/NotFoundMpxnResponse"
+                  - $ref: "#/components/schemas/MPxNNotAssociatedWithAHANError"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /get-update-frequencies/{mpxn}:
+    get:
+      operationId: RetrieveDataUpdateFrequencies
+      summary: Get frequency
+      description: "Returns the values of the data update frequency for the utility types in one of the consented HANs"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+          description: "The MPxN, which can be either an MPAN or MPRN."
+      responses:
+        "200":
+          description: "Success message for Retrieving update frequencies request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveDataUpdateFrequenciesSuccessResponse"
+        "400":
+          description: "Bad request. The MPxN is absent or in invalid format."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: "Success message for Retrieving update frequencies request."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ConsentNotFoundResponse"
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}:
+    get:
+      operationId: RetrieveDataForReadingType
+      summary: Retrieve consumption/ production data
+      description: "Returns data for consumptions/productions for a specific MPxN, utility and reading type"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+          description: "The MPxN, which can be either an MPAN or MPRN."
+        - in: path
+          name: utility
+          required: true
+          schema:
+            type: string
+            enum: ["electricity", "gas"]
+          description: "The utility type of the meter."
+        - in: path
+          name: readingType
+          required: true
+          schema:
+            type: string
+            enum: ["consumption", "production", "import", "export", "tariff", "READ_INSTANTANEOUS_IMPORT_REGISTERS", "READ_INSTANTANEOUS_EXPORT_REGISTERS", "RETRIEVE_IMPORT_DAILY_READ_LOG", "RETRIEVE_EXPORT_DAILY_READ_LOG", "RETRIEVE_DAILY_CONSUMPTION_LOG"]
+          description: "The reading type."
+        - in: query
+          name: start
+          schema:
+            type: string
+            example: "202205161100"
+          description: "Start date to be considered."
+        - in: query
+          name: end
+          schema:
+            type: string
+            example: "202205161100"
+          description: "End date to be considered."
+        - in: query
+          name: granularity
+          schema:
+            type: string
+            enum: ["halfhour", "day"]
+          description: "Time granularity to be considered."
+        - in: query
+          name: outputFormat
+          schema:
+            type: string
+            enum: ["json", "csv"]
+          description: "Output format to be considered."
+        - in: query
+          name: includeCheckMeter
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: "Indicates whether to include check meter information in the response."
+      responses:
+        "200":
+          description: "Success message for Retrieving Reading data request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveReadingDataSuccessResponse"
+        "403":
+          description: "Forbidden to access the endpoint or no consent found for the customer"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ConsentNotFoundResponse"
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+        "400":
+          description: "Bad request. There was an error while validating the request parameters."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "404":
+          description: "No available information for the specified utility in the HAN associated with the received MPxN"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MPxNNotAssociatedWithAHANError"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+  /set-defaults:
+    put:
+      operationId: SetDefaults
+      summary: Set defaults
+      description: "Allows updating account default values for the update frequency of meter readings and if historic data should be recovered after a consent."
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Request body with information to change default values.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetDefaultsBodyRequest"
+      responses:
+        "200":
+          description: "Success message for Set Defaults request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetDefaultsSuccessResponse"
+        "400":
+          description: "Bad request. The request body is invalid."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: "Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /reset-all-update-frequencies:
+    put:
+      operationId: ResetAllUpdateFrequencies
+      summary: Reset all
+      description: "Sets new update frequencies for all consented HANs."
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Request body with the new values for values for electricity_import_update_frequency, electricity_export_update_frequency and gas_update_frequency.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/ResetAllUpdateFrequenciesRequestRequiredElectricityImport"
+                - $ref: "#/components/schemas/ResetAllUpdateFrequenciesRequestRequiredElectricityExport"
+                - $ref: "#/components/schemas/ResetAllUpdateFrequenciesRequestRequiredGasImport"
+      responses:
+        "200":
+          description: "Success message for reset all update frequencies."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetAllUpdateFrequenciesSuccessResponse"
+        "400":
+          description: "Bad request. There was an error while validating request body."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestBodyResponse"
+        "403":
+          description: "Forbidden to access the endpoint."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /read-inventory:
+    post:
+      operationId: ReadInventory
+      summary: Read smart meter inventory
+      description: "Allows the user to request to DCC the list of Devices and WAN Matrix for a MPxN, UPRN or Device ID"
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: last-communications
+          schema:
+            type: boolean
+          description: "Triggers a last communications request. The asynchronous data received by the json file will contain the information about the last communications date."
+        - in: query
+          name: check-firmware
+          schema:
+            type: boolean
+          description: "Triggers a check firmware version request."
+        - in: query
+          name: deviceType
+          schema:
+            type: string
+            example: "ESME"
+          description: "Specifies a device type for the check firmware request. Admissible values ['ESME','GSME']"
+      requestBody:
+        description: Request body with information to Read Inventory values.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadInventoryBodyRequest"
+      responses:
+        "200":
+          description: "Success message for Read Inventory request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadInventorySuccessResponseNoQueryParams"
+        "400":
+          description: "Bad request. The request body is invalid."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: "Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /create-export-profiles:
+    post:
+      operationId: CreateExportProfiles
+      summary: Creates export profiles on the V1 solution.
+      description: "Allows the user to request the creation of Export Profiles on the V1 solution"
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/CreateExportProfilesRequest"
+      responses:
+        "200":
+          description: "Success message for Create Export Profiles."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateExportProfilesSuccessResponse"
+        "202":
+          description: "Success message for Create Export Profiles."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateExportProfilesAcceptedResponse"
+        "429":
+          description: "Bad request. The request body is invalid."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "403":
+          description: "Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /upload/data/deviceid/{deviceId}/readingtype/{readingType}:
+    post:
+      summary: Upload data to device.
+      description: Uploads data into a device identified by its deviceId.
+      operationId: uploadData
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: deviceId
+          description: Device Identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 0CA2F400005CDFA3
+        - name: readingType
+          description: Type of the reading being imported.
+            Tariffs not supported.
+            Consumption and import are alias, same for production and export.
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: ["consumption", "production", "import", "export", "READ_INSTANTANEOUS_IMPORT_REGISTERS", "READ_INSTANTANEOUS_EXPORT_REGISTERS", "RETRIEVE_IMPORT_DAILY_READ_LOG", "RETRIEVE_EXPORT_DAILY_READ_LOG", "RETRIEVE_DAILY_CONSUMPTION_LOG"]
+            example: import
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MeteredValues"
+        required: true
+      responses:
+        200:
+          description: "Indicates that the request has succeeded. Data stored for a device identified by the deviceId."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings or values. Notice that the values are numeric."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        404:
+          description: "Not Found. The provided deviceId does not match a device."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /upload/data/deviceid/{deviceId}/readingtype/{readingType}/starttime/{startTime}/endtime/{endTime}:
+    delete:
+      summary: Deletes data from a device.
+      description: Deletes data from a device identified by its deviceId.
+        Data to be purged are type and time bounded.
+      operationId: deleteData
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: deviceId
+          description: Device Identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 0CA2F400005CDFA3
+        - name: readingType
+          description: Type of the reading being imported.
+            Tariffs not supported.
+            Consumption and import are alias, same for production and export.
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: ["consumption", "production", "import", "export"]
+            example: import
+        - name: startTime
+          description: Date/time from which the values will be deleted (in the ISO8601 format).
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+            example: 2023-01-24T05:29:36Z
+        - name: endTime
+          description: Date/time till which the values will be deleted (in the ISO8601 format).
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+            example: 2023-01-25T05:29:36Z
+      responses:
+        200:
+          description: "Indicates that the request has succeeded. Data deleted for a device identified by the deviceId."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        404:
+          description: "Not Found. The provided deviceId does not match a device."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /upload/devices/:
+    post:
+      summary: Adds a new non-SMETS device to the inventory.
+      description: |
+        Adds a new non-SMETS device to the inventory.
+        The given device shall not specify the hanId, as it will be generated by the service.
+        The device fields will be verified for match with the customer permission specified in customer-extended-permissions.uploadsAccessFilter.
+        If it doesn't match then operation will be forbidden.
+      operationId: addDevice
+      security:
+        - ApiKeyAuth: []
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDevice"
+        required: true
+      responses:
+        200:
+          description: "Indicates that the request has succeeded. The inventory data was updated accordingly."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  deviceId:
+                    type: string
+                    example: "0CA2F400005CDFA3"
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check the schema for the request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        409:
+          description: "Conflict. The request could not be completed due to a conflict with the current state of the resource. The device already exists in the inventory. To update it use PUT method instead."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device already exists"
+                  conflictingDeviceId:
+                    type: string
+                    example: "0CA2F400005CDFA3"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+    get:
+      summary: Retrieves a list of devices from the inventory.
+      description: Retrieves a list of devices from the inventory.
+        Only devices matching with the customer permission specified in
+        customer-extended-permissions.uploadsAccessFilter will be retrieved.
+      operationId: listDevices
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: startAt
+          description: Start position index.
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+        - name: maxResults
+          description: Max number of records to be returned.
+          in: query
+          schema:
+            type: integer
+            minimum: 10
+            multipleOf: 10
+            default: 500
+            example: 1000
+      responses:
+        200:
+          description: Indicates that the request has succeeded.
+            Retrieves a list of devices.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AMRDevice"
+        204:
+          description: "No Content. The request was fulfilled, but no information to retrieve in the response body. The StartAt parameter might be exceeding the total number of records."
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /upload/devices/deviceid/{deviceId}:
+    get:
+      summary: Retrieves a device from the inventory.
+      description: Retrieves a device from the inventory.
+        Only devices matching with the customer permission specified in
+        customer-extended-permissions.uploadsAccessFilter will be retrieved.
+      operationId: getDevice
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: deviceId
+          description: Device Identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 0CA2F400005CDFA3
+      responses:
+        200:
+          description: Indicates that the request has succeeded.
+            Retrieves a device identified by the deviceId.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AMRDevice"
+        204:
+          description: "No Content. The request was fulfilled, but no information to retrieve in the response body. The StartAt parameter might be exceeding the total number of records."
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        404:
+          description: "Not Found. The provided deviceId does not match a device."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+    put:
+      summary: Updates an existing non-SMETS device in the inventory.
+      description:
+        Updates an existing non-SMETS device to the inventory. The given device shall not specify the hanId.
+        The device fields will be verified for match with the customer permission specified in
+        customer-extended-permissions.uploadsAccessFilter.
+        If it doesn't match then operation will be forbidden.
+        Both new and old fields values must be checked.
+      operationId: updateDevice
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: deviceId
+          description: Device Identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 0CA2F400005CDFA3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDevice"
+        required: true
+      responses:
+        200:
+          description: "Indicates that the request has succeeded. Updated a device identified by the deviceId."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "updated"
+                  deviceId:
+                    type: string
+                    example: "0CA2F400005CDFA3"
+        204:
+          description: "No Content. The request was fulfilled, but no information to retrieve in the response body. The inventory data was updated accordingly."
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings or values."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        404:
+          description: "Not Found. The provided deviceId does not match a device."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+    delete:
+      summary: Deletes a non-SMETS device from the inventory
+      description:
+        Deletes a non-SMETS device from the inventory, identified by the deviceId.
+        The device fields will be verified for a match with the customer permission specified in
+        customer-extended-permissions.uploadsAccessFilter.
+        If it doesn't match then the operation will be forbidden.
+      operationId: deleteDevice
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: deviceId
+          description: Device Identifier
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 0CA2F400005CDFA3
+      responses:
+        200:
+          description: "Indicates that the request has succeeded. A device entry will be returned."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "deleted"
+        400:
+          description: "Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        403:
+          description: "Unauthorized request. The client does not have access rights to the content."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        404:
+          description: "Not Found. The provided deviceId does not match a device."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /update-now/mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}:
+    get:
+      operationId: generateFetchNowRequest
+      summary: "Update Now Request"
+      description: "Requests a reading request for the meter with a given MPxN for a given utility and reading type. It will request data from the latest end cache date."
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+            description: "The MPxN, which can be either an MPAN or MPRN."
+        - in: path
+          name: utility
+          required: true
+          schema:
+            type: string
+            example: "electricity"
+            description: "The utility type, which can be either ELECTRICITY or GAS."
+        - in: path
+          name: readingType
+          required: true
+          schema:
+            type: string
+            example: "IMPORT"
+            description: "The reading type, which can be either IMPORT, EXPORT or TARIFF."
+        - in: query
+          name: start
+          required: false
+          schema:
+            type: string
+            example: "202205161100"
+          description: "Start date to be considered."
+        - in: query
+          name: end
+          required: false
+          schema:
+            type: string
+            example: "202205161100"
+          description: "End date to be considered."
+      responses:
+        "200":
+          description: "Request accepted."
+        "429":
+          description: "Too Many Requests."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "403":
+          description: "Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /push/configuration:
+    get:
+      operationId: GetPushNotificationConfiguration
+      summary: "Get Push Notification Configuration"
+      description: "Returns the customer current URL and device configurations for the Push Notifications."
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      responses:
+        "200":
+          description: "Success message"
+        "403":
+          description: "Forbidden. Customer doesn't have permissions to configure Push Notifications."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+    post:
+      operationId: EditPushNotificationConfiguration
+      summary: "Edit Push Notification Configuration"
+      description: "Edits the Push Notification configurations for the customer."
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: "Request body with details to change push notification configuration."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushNotificationBodyRequest"
+      responses:
+        "200":
+          description: "Success message"
+        "400":
+          description: "Bad request. The request body is invalid."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: "Forbidden. Customer doesn't have permissions to configure Push Notifications."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+    delete:
+      operationId: DeletePushNotificationConfiguration
+      summary: "Delete Push Notification Configuration"
+      description: "Deletes the Push Notification configurations for the customer."
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      responses:
+        "200":
+          description: "Success message"
+        "403":
+          description: "Forbidden. Customer doesn't have permissions to configure Push Notifications."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /push/status:
+    get:
+      operationId: RetrievePushNotificationStatus
+      summary: "Retrieve Push Notification Status"
+      description: "Returns the customer's last push notification status."
+      security:
+        - ApiKeyAuth: []
+      parameters: []
+      responses:
+        200:
+          description: Indicates that the request has succeeded.
+            Retrieves the data for the last push notification status for the given customer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AMRDevice"
+        "403":
+          description: "Forbidden. Customer doesn't have permissions to configure Push Notifications."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ForbiddenResponse"
+        "404":
+          description: "Forbidden. No data for the customer's push notification status is present in the system."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/NotFoundPushNotificationResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+  /internal/{mpxn}/{utility}/{readingType}:
+    get:
+      operationId: RetrievePropertyElements
+      summary: "Retrieve Property Elements"
+      description: "Temporary endpoint that validates and returns the primary elements for a specific MPxN, utility and reading type. It always returns 1."
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+            description: "The MPxN, which can be either an MPAN or MPRN."
+        - in: path
+          name: utility
+          required: true
+          schema:
+            type: string
+            example: "electricity"
+            description: "The utility type, which can be either electricity or gas."
+        - in: path
+          name: readingType
+          required: true
+          schema:
+            type: string
+            enum: ["consumption", "production", "import", "export", "tariff"]
+          description: "The reading type."
+      responses:
+        "200":
+          description: "Success message for Retrieving Reading data request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveReadingDataSuccessResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+    post:
+      operationId: RetrieveReadingTypeData
+      summary: "Retrieve Reading Type Data"
+      description: "internal endpoint fetches reading type data a specific MPxN, utility and reading type."
+      security: []
+      parameters:
+        - in: path
+          name: mpxn
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1234567891002"
+          description: "The MPxN, which can be either an MPAN or MPRN."
+        - in: path
+          name: utility
+          required: true
+          schema:
+            type: string
+            enum: ["electricity", "gas"]
+          description: "The utility type, which can be either electricity or gas."
+        - in: path
+          name: readingType
+          required: true
+          schema:
+            type: string
+            enum: ["consumption", "production", "import", "export", "tariff"]
+          description: "The reading type."
+      responses:
+        "200":
+          description: "Success message for Retrieving Reading data request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveReadingDataSuccessResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER
+  schemas:
+    RetrieveConsentedMPxNsSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: "/"
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: "2020-11-10T17:07:01.580Z"
+        startAt:
+          type: integer
+          description: parameter startAt.
+          example: 0
+        maxResults:
+          type: integer
+          description: parameter maxResults.
+          example: 100
+        total:
+          type: integer
+          description: number of MPxNs retrieved.
+          example: 1
+        entries:
+          type: array
+          items:
+            type: string
+            description: consented MPxNs.
+            pattern: "[0-9]{13}||[0-9]{9}"
+            example: "1230267891094"
+    ParamStartAtErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Parameter startAt must be an integer.
+    ParamMaxResultsErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Parameter maxResults must be an integer.
+    RetrieveUtilitiesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource with the MPxN
+          type: string
+          example: "/mpxn/1234567891012"
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: "2022-04-10T17:07:01.580Z"
+        entries:
+          description: The utilities of the han
+          type: array
+          items:
+            type: string
+          example: "['electricity', 'gas']"
+    ConsentNotFoundResponse:
+      description: Response when the Consent was not found for the given MPxN.
+      type: object
+      properties:
+        errors:
+          allOf:
+            - $ref: "#/components/schemas/ConsentNotFoundError"
+            - description: List of errors.
+    ConsentNotFoundError:
+      description: Consent Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: "Consent for the given MPxN not found."
+    RetrieveReadingTypesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource with the MPxN
+          type: string
+          example: "/mpxn/1234567891012"
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: "2022-04-10T17:07:01.580Z"
+        devices:
+          description: The devices of the han with reading types
+          type: array
+          items:
+            type: object
+            properties:
+              deviceId:
+                description: The id of the device
+                type: string
+                example: "01-0A-00-00-00-00-FF-03"
+              availableDataTypes:
+                description: The available reading types of the device
+                type: array
+                items:
+                  type: string
+                example: "['consumption', 'tariff']"
+    RetrieveMPxNAvailabilitySuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path
+          example: "/"
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created
+          example: "2020-11-10T17:07:01.580Z"
+        mpxn:
+          type: string
+          description: Path parameter MPxN
+          example: "1230267891094"
+        deviceType:
+          type: string
+          description: The device type
+          example: "ESME"
+        deviceId:
+          description: The device id
+          type: string
+          example: "01-0A-00-00-00-00-FF-03"
+        deviceStatus:
+          type: string
+          description: The device status
+          example: "Commissioned"
+        deviceManufacturer:
+          type: string
+          description: The device manufacturer code
+          example: "106C"
+        deviceModel:
+          type: string
+          description: The device model
+          example: "10E2A100"
+        deviceGbcsVersion:
+          type: string
+          description: The device gbcs version
+          example: "3.2"
+        deviceFirmwareVersion:
+          type: string
+          description: The device firmware version
+          example: "0314B600"
+        smetsChtsVersion:
+          type: string
+          description: The device smets chts version
+          example: "V4.2"
+        multipleMatchingResults:
+          type: boolean
+          description: True when more than one meter for meter type is found for the given HAN (e.g. two ESMEs)
+        propertyFilter:
+          type: object
+          properties:
+            postCode:
+              description: The post code where the meter is installed
+              type: string
+              example: SW1A 1AA
+            addressIdentifier:
+              description: The address where the meter is installed
+              type: string
+              maxLength: 30
+              example: Someones street,7H,York
+    ParamMPxNErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: An MPxN must be provided, and must be a value between 1 and 13 digits.
+    NotFoundMpxnResponse:
+      description: Response when the MPxN was not found or not associated with a HAN.
+      type: object
+      properties:
+        errors:
+          allOf:
+            - $ref: "#/components/schemas/NotFoundMpxnError"
+            - description: List of errors.
+    NotFoundMpxnError:
+      description: Mpxn Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 404.
+            format: int32
+            type: integer
+            example: 404
+          message:
+            description: Error message.
+            type: string
+            example: "There is no available information of meters associated with the received MPxN."
+    MPxNNotAssociatedWithAHANError:
+      description: Mpxn not associated with any HAN.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: "The received MPxN is associated with a device that is not associated to any premises."
+    RetrieveDataUpdateFrequenciesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: "get-update-frequencies/1234567891001"
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: "2020-11-10T17:07:01.580Z"
+        status:
+          type: integer
+          description: The request's status code.
+          example: 200
+        utilities:
+          type: array
+          items:
+            type: object
+            properties:
+              utilityType:
+                type: string
+                description: The utility type
+                example: "Electricity"
+              devices:
+                description: The devices of the han with the utility type
+                type: array
+                items:
+                  type: object
+                  properties:
+                    deviceId:
+                      type: string
+                      description: The id of the device
+                      example: "01-0A-00-00-00-00-FF-03"
+                    updateType:
+                      type: string
+                      description: The utility type plus reading type
+                      example: "electricity#import"
+                    updateFrequency:
+                      type: string
+                      description: The update frequency for the update type
+                      example: "24h"
+    RetrieveReadingDataSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource used
+          type: string
+          example: "/mpxn/1234567891000/utility/electricity/readingType/consumption?start=202203100830&end=202203111230"
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: "2022-04-10T17:07:01.580Z"
+        availableCacheRange:
+          description: The timestamp available in the cache table
+          type: object
+          properties:
+            start:
+              description: The minimum start date
+              type: string
+              example: "202104262300"
+            end:
+              description: The maximum end date
+              type: string
+              example: "202204260000"
+        start:
+          description: The start date being used to retrieve data from Dynamo DB
+          type: string
+          example: "202203100830"
+        end:
+          description: The end date being used to retrieve data from Dynamo DB
+          type: string
+          example: "202203111230"
+        granularity:
+          description: The granularity of the response
+          type: string
+          example: "halfhour"
+        unit:
+          description: The unit of measure for the readings
+          type: string
+          example: "kWh"
+        devices:
+          description: The devices of the han with all the readings
+          type: array
+          items:
+            type: object
+            properties:
+              deviceId:
+                description: The id of the device
+                type: string
+                example: "01-0A-00-00-00-00-FF-03"
+              values:
+                description: The available readings for the device
+                type: array
+                items:
+                  type: object
+                  properties:
+                    primaryValue:
+                      description: The primary value for the reading
+                      type: number
+                      example: 11.183
+                    secondaryValue:
+                      description: The secondary value for the reading
+                      type: number
+                      example: 9.703
+                    timestamp:
+                      description: The timestamp for the reading
+                      type: string
+                      example: "2022-03-10"
+                    totalHHBlocks:
+                      description: The number of half-hour records used in the calculation (when the granularity = day)
+                      type: integer
+                      example: 48
+                    unit:
+                      description: The unit of measure for this specific reading value
+                      type: string
+                      example: "kWh"
+                    type:
+                      description: The type classification of the reading value
+                      type: string
+                      enum: [ "HALF_HOURLY", "TOTAL_BY_PHASE", "TOTAL", "REVERSE", "Q4", "Q3", "Q2", "Q1", "Q3-Q2", "Q3+Q4", "Q2-Q3", "Q2+Q4", "Q2+Q3", "Q1-Q4", "Q1+Q4", "Q1+Q3", "Q1+Q2", "NET", "LEADING", "FORWARD", "LAGGING" ]
+                      example: "TOTAL"
+    RetrievePrimaryElementsResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource used
+          type: string
+          example: "/1234567891000/electricity/consumption"
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: "2022-04-10T17:07:01.580Z"
+        entries:
+          description: The primary elements of the han
+          type: array
+          items:
+            description: The id of the device
+            type: integer
+            example: 1
+    CreateExportProfilesRequest:
+      type: array
+      items:
+        type: string
+      description: Array of MPxN values. Each value must be between 1 and 13 digits.
+    ReadInventoryBodyRequest:
+      type: object
+      properties:
+        mpxns:
+          type: array
+          items:
+            type: string
+          description: Array of MPxN values. Each value must be between 1 and 13 digits.
+        uprns:
+          type: array
+          items:
+            type: string
+          description: Array of UPRN values. Each value must be an integer with up to 12 digits.
+        deviceIds:
+          type: array
+          items:
+            type: string
+          description: Array of Device IDs. Each value must match the pattern of an EUI-64 identifier (XX-XX-XX-XX-XX-XX-XX-XX, where X is an hexadecimal character (a digit 0 to 9 or a letter a to f, or A to F).
+    CreateExportProfilesSuccessResponse:
+      type: string
+      description: Empty body response
+    CreateExportProfilesAcceptedResponse:
+      type: array
+      items:
+        type: string
+      description: Array of MPxN values. Each value must be between 1 and 13 digits. That failed to create an export profiles
+    ReadInventorySuccessResponseNoQueryParams:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status of the submitted request.
+          example: 200
+        uuid:
+          type: string
+          description: Universally unique identifier for each request being processed.
+          example: 46ff4ffd-cfb0-4705-acaa-14a780973540
+        uri:
+          type: string
+          description: URI (Uniform Resource Identifier) for the file containing the results of the query being processed.
+          example: https://46ff4ffd-cfb0-4705-acaa-14a780973540.json
+    MeteredValues:
+      type: object
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          description: Timestamp of the reading in the ISO8601 format.
+          type: string
+          format: date
+          example: "2020-11-10T17:07:01.580Z"
+        primaryValue:
+          description: "The consumption/production reading of the meter.
+            It should be a decimal with a decimal point."
+          type: number
+          format: double
+          example: 0.25
+        secondaryValue:
+          description:
+            "In hybrid meters should be filled with the second element consumption/production.
+            It should be a decimal with a decimal point."
+          type: number
+          format: double
+          example: 0.25
+        additionalInformation:
+          description:
+            'A textual information that may be relevant for the given timestamp.
+            Only a set of values are acceptable.
+            The values will be translated into:
+            VALID_VALUE = ""
+            INVALID_VALUE = "invalid value"
+            VALUE_NOT_AVAILABLE_IN_SMSO = "value not available in SMSO"
+            INVALID_TIMESTAMP = "invalid timestamp"'
+          type: string
+          enum:
+            - VALID_VALUE
+            - INVALID_VALUE
+            - VALUE_NOT_AVAILABLE_IN_SMSO
+            - INVALID_TIMESTAMP
+          example: VALID_VALUE
+        type:
+          description: The type classification of the reading value
+          type: string
+          enum: [ "HALF_HOURLY", "TOTAL_BY_PHASE", "TOTAL", "REVERSE", "Q4", "Q3", "Q2", "Q1", "Q3-Q2", "Q3+Q4", "Q2-Q3", "Q2+Q4", "Q2+Q3", "Q1-Q4", "Q1+Q4", "Q1+Q3", "Q1+Q2", "NET", "LEADING", "FORWARD", "LAGGING" ]
+          example: "TOTAL"
+    UploadDevice:
+      type: object
+      required:
+        - deviceId
+        - deviceManufacturer
+        - importMPxN
+        - smso
+      properties:
+        commissionedDate:
+          description:
+            "The date in which the device was commissioned in UTC ISO8601 format
+            (e.g.: 2023-01-24T05:29:36Z). If no time of the day is
+            provided, it will default to midnight (2023-01-24Z)."
+          type: string
+          format: date
+          example: "2023-01-24T05:29:36Z"
+        deviceId:
+          description:
+            Unique Identifier that can identify the device to the user.
+            It will be the MAC address in the case of a SMETS device,
+            and it will be the meter serial number in the case of an AMR device.
+          type: string
+          example: 0CA2F400005CDFA3
+        deviceManufacturer:
+          description: Identifies the meter manufacturer name.
+          type: string
+          example: MyBrand
+        deviceModel:
+          description: Identifies the meter manufacturer model.
+          type: string
+          example: AA.BB.CC
+        deviceStatus:
+          description: The status of the meter.
+          default: UNDEFINED
+          type: string
+          enum:
+            - PENDING
+            - WHITELISTED
+            - INSTALLED_NOT_COMMISSIONED
+            - COMMISSIONED
+            - DECOMMISSIONED
+            - WITHDRAWN
+            - SUSPENDED
+            - RECOVERY
+            - RECOVERED
+            - UNDEFINED
+          example: COMMISSIONED
+        deviceType:
+          description: "Device type enum. Should follow SMETS standards (e.g.: ESME, GSME, ESME_EXPORT)."
+          type: string
+          enum:
+            - ESME
+            - GSME
+            - ESME_EXPORT
+          example: ESME
+        exportMPAN:
+          description: Meter Point Access Number for export.
+          type: string
+          pattern: "[0-9]{13}||[0-9]{9}"
+          example: 9876580000483
+        firmwareVersion:
+          description: The firmware version of the meter.
+          type: string
+          example: 1100EEFF
+        importMPxN:
+          description: Meter Point Identifier Number for import.
+          type: string
+          pattern: "[0-9]{13}||[0-9]{9}"
+          example: 9876580000483
+        postCode:
+          description: The post code where the meter is installed.
+          type: string
+          example: SW1A 1AA
+        address:
+          description: The address where the meter is installed.
+          type: string
+          maxLength: 30
+          example: Someones street,7H,York
+        smso:
+          description: This identifies the SMSO managing the meter.
+            In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC)
+            these values will be forbidden when importing devices through the GUA interface.
+            Thus any values not in ('Secure', 'DCC') will be allowed.
+          type: string
+          example: AMR
+    AMRDevice:
+      allOf:
+        - type: object
+          properties:
+            hanId:
+              description:
+                This is the property identifier. Will be generated when a new device is added.
+                This field shall not be specified for create or update operations. Shall only be defined on read operations.
+              type: string
+              example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
+        - $ref: "#/components/schemas/UploadDevice"
+    SetDefaultsBodyRequest:
+      type: object
+      properties:
+        getHistoryData:
+          type: string
+          enum: ["true", "false"]
+          description: Indicates if historic data should be obtained from the meters in a consented HAN.
+        electricityImportUpdateFrequency:
+          type: string
+          enum: ["NEVER", "3H", "6H", "12H", "DAILY", "WEEKLY", "MONTHLY"]
+          description: Determines the frequency of import data updates for electric meters in a consented HAN.
+        electricityExportUpdateFrequency:
+          type: string
+          enum: ["NEVER", "3H", "6H", "12H", "DAILY", "WEEKLY", "MONTHLY"]
+          description: Determines the frequency of export data updates for electric meters in a consented HAN.
+        gasUpdateFrequency:
+          type: string
+          enum: ["NEVER", "3H", "6H", "12H", "DAILY", "WEEKLY", "MONTHLY"]
+          description: Determines the frequency of data updates for gas meters in a consented HAN.
+        electricityInstantaneousRegistersImportUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of instantaneous registers import data updates for electric meters in a consented HAN.
+        electricityInstantaneousRegistersExportUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of instantaneous registers export data updates for electric meters in a consented HAN.
+        gasInstantaneousRegistersImportUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of instantaneous registers import data updates for gas meters in a consented HAN.
+        electricityImportDailyReadLogUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of daily read log import data updates for electric meters in a consented HAN.
+        electricityExportDailyReadLogUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of daily read log export data updates for electric meters in a consented HAN.
+        electricityDailyConsumptionLogUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of consumption log data updates for electric meters in a consented HAN.
+        gasDailyConsumptionLogUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of consumption log data updates for gas meters in a consented HAN.
+        gasImportDailyReadLogUpdateFrequency:
+          type: string
+          enum: [ "NEVER","DAILY", "WEEKLY", "MONTHLY" ]
+          description: Determines the frequency of daily read log import data updates for gas meters in a consented HAN.
+    SetDefaultsSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: "/set-defaults"
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: "2022-04-10T17:07:01.580Z"
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status
+              example: "OK"
+            message:
+              type: string
+              description: The request's message
+              example: "Request to reset default(s) in customer profile was successful."
+
+    PushNotificationBodyRequest:
+      type: object
+      properties:
+        URI:
+          type: string
+          description: Indicates the URI given by the customer to receive Push Notifications.
+        ESME:
+          type: array
+          items:
+            type: string
+            enum: ["IMPORT", "CONSUMPTION", "EXPORT", "PRODUCTION", "TARIFF"]
+          description: Determines the electricity reading types for which to receive Push Notifications.
+          example: ["IMPORT", "EXPORT"]
+        GSME:
+          type: array
+          items:
+            type: string
+            enum: ["IMPORT", "CONSUMPTION", "TARIFF"]
+          description: Determines the gas reading types for which to receive Push Notifications.
+          example: ["IMPORT", "TARIFF"]
+
+    TooManyRequestsResponse:
+      description: The API is being accessed over the limit.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Too Many Requests
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+            - $ref: "#/components/schemas/ListBadRequestDto"
+            - description: List of errors.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: "#/components/schemas/BadRequestErrorDto"
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    ResetAllUpdateFrequenciesRequest:
+      type: object
+      properties:
+        electricityImportUpdateFrequency:
+          type: string
+          description: Determines the frequency of import data updates for electric meters in the property.
+          enum:
+            - never
+            - 3h
+            - 6h
+            - 12h
+            - 24h
+            - weekly
+            - monthly
+          example: "never"
+        electricityExportUpdateFrequency:
+          type: string
+          description: Determines the frequency of export data updates for electric meters in the property.
+          enum:
+            - never
+            - 3h
+            - 6h
+            - 12h
+            - 24h
+            - weekly
+            - monthly
+          example: "never"
+        gasUpdateFrequency:
+          type: string
+          description: Determines the frequency of data updates for gas meters in the property.
+          enum:
+            - never
+            - 3h
+            - 6h
+            - 12h
+            - 24h
+            - weekly
+            - monthly
+          example: "never"
+    ResetAllUpdateFrequenciesRequestRequiredElectricityImport:
+      allOf:
+        - $ref: "#/components/schemas/ResetAllUpdateFrequenciesRequest"
+      type: object
+      required:
+        - electricityImportUpdateFrequency
+    ResetAllUpdateFrequenciesRequestRequiredElectricityExport:
+      allOf:
+        - $ref: "#/components/schemas/ResetAllUpdateFrequenciesRequest"
+      type: object
+      required:
+        - electricityExportUpdateFrequency
+    ResetAllUpdateFrequenciesRequestRequiredGasImport:
+      allOf:
+        - $ref: "#/components/schemas/ResetAllUpdateFrequenciesRequest"
+      type: object
+      required:
+        - gasUpdateFrequency
+    ResetAllUpdateFrequenciesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: "/reset-all-update-frequencies"
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: "2020-11-10T17:07:01.580Z"
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status.
+              example: "OK"
+            message:
+              type: string
+              description: Success's message.
+              example: "Request to reset update frequencies was successful."
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: "User is not authorized to access this resource with an explicit deny."
+    NotFoundResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Resource not found"
+    NotFoundPushNotificationResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 404
+              message:
+                type: string
+                description: error message
+                example: "No records for push notification status found at this time."
+    BadRequestBodyResponse:
+      description: Invalid request body.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 400
+              message:
+                type: string
+                description: error message
+                example: "At least one body parameter must be provided."
+    SetMeterUpdateFrequencySuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: "/set-meter-update-frequency"
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: "2020-11-10T17:07:01.580Z"
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status.
+              example: "OK"
+            message:
+              type: string
+              description: The request's message.
+              example: "Request to reset update frequency for the meter was successful."
+    SetMeterUpdateFrequencyForbiddenResponseList:
+      description: List for a bad request response.
+      type: object
+      properties:
+        errors:
+          allOf:
+            - $ref: "#/components/schemas/SetMeterUpdateFrequencyForbiddenResponse"
+            - description: List of errors.
+    SetMeterUpdateFrequencyForbiddenResponse:
+      description: Bad request response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: "User is not authorized to access this resource with an explicit deny."
+    SetMeterUpdateFrequencyBadRequestResponseList:
+      description: List for a bad request response.
+      type: object
+      properties:
+        errors:
+          allOf:
+            - $ref: "#/components/schemas/SetMeterUpdateFrequencyBadRequestResponse"
+            - description: List of errors.
+    SetMeterUpdateFrequencyBadRequestResponse:
+      description: Bad request response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 400.
+            format: int32
+            type: integer
+            example: 400
+          message:
+            description: Error message.
+            type: string
+            example: "The specified deviceID does not correspond to a meter."
+    SetMeterUpdateFrequencyNotFoundResponseList:
+      description: List for a not found  response.
+      type: object
+      properties:
+        errors:
+          allOf:
+            - $ref: "#/components/schemas/SetMeterUpdateFrequencyNotFoundResponse"
+            - description: List of errors.
+    SetMeterUpdateFrequencyNotFoundResponse:
+      description: Not found response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 404.
+            format: int32
+            type: integer
+            example: 404
+          message:
+            description: Error message.
+            type: string
+            example: "The specified deviceID is not associated with a consented HAN."
+    SetMeterUpdateFrequencyBody:
+      type: object
+      properties:
+        deviceID:
+          type: string
+          description: "Device ID of the meter whose update frequencies are to be set."
+          example: "01-02-03-04-05-06-07-08"
+        importUpdateFrequency:
+          type: string
+          description: "(Optional) Determines the frequency of data updates for electric meters in a consented HAN. One of: NEVER, H_2, H_3, H_6, H_12, DAILY, WEEKLY, MONTHLY."
+          example: "H_2"
+        exportUpdateFrequency:
+          type: string
+          description: "(Optional) Determines the frequency of data updates for electric meters in a consented HAN. One of: NEVER, H_2, H_3, H_6, H_12, DAILY, WEEKLY, MONTHLY."
+          example: "H_2"
