@@ -31,7 +31,7 @@ tags:
 - Energy Data
 created: '2026-07-27'
 modified: '2026-07-27'
-specificationVersion: '0.19'
+specificationVersion: '0.23'
 apis:
 - aid: n3rgy:customer-service-api-v2
   name: n3rgy Customer Service API V2
