@@ -1,24 +1,18 @@
 generated: '2026-07-27'
 method: derived
 status: candidate
-source: >-
-  Derived one tool per operationId from
-  openapi/n3rgy-customer-service-api-v2-openapi.yaml. No official n3rgy MCP
-  server exists — searched the developer guide, github.com/n3rgy (0 public
-  repos), npm (@modelcontextprotocol/* and n3rgy), and probed
-  https://api-v2.data.n3rgy.com/mcp and /.well-known/oauth-protected-resource
-  (both 404) on 2026-07-27.
+source: Derived one tool per operationId from openapi/n3rgy-customer-service-api-v2-openapi.yaml. No official
+  n3rgy MCP server exists — searched the developer guide, github.com/n3rgy (0 public repos), npm (@modelcontextprotocol/*
+  and n3rgy), and probed https://api-v2.data.n3rgy.com/mcp and /.well-known/oauth-protected-resource (both
+  404) on 2026-07-27.
 published_by_provider: false
-description: >-
-  n3rgy operates no MCP server. This is a CANDIDATE tool surface derived
-  mechanically from the 26 operations of the Customer Service API V2 so an agent
-  builder can stand one up without guessing. Every tool below inherits its real
-  input schema from the named operation's parameters and requestBody in the
-  OpenAPI — nothing is invented. Two caveats an implementer must carry through:
-  (1) every call needs an x-api-key issued and enabled by the n3rgy back office,
-  and (2) the consent-bearing tools additionally require an ACTIVE end-customer
-  consent for the HAN behind the MPxN, so a tool returning 403 "Consent for the
-  given MPxN not found." is a consent gap, not an auth failure.
+description: 'n3rgy operates no MCP server. This is a CANDIDATE tool surface derived mechanically from
+  the 26 operations of the Customer Service API V2 so an agent builder can stand one up without guessing.
+  Every tool below inherits its real input schema from the named operation''s parameters and requestBody
+  in the OpenAPI — nothing is invented. Two caveats an implementer must carry through: (1) every call
+  needs an x-api-key issued and enabled by the n3rgy back office, and (2) the consent-bearing tools additionally
+  require an ACTIVE end-customer consent for the HAN behind the MPxN, so a tool returning 403 "Consent
+  for the given MPxN not found." is a consent gap, not an auth failure.'
 server:
   name: n3rgy
   transport: http
@@ -27,118 +21,141 @@ server:
   base_url_live: https://api-v2.data.n3rgy.com
   base_url_sandbox: https://api-v2-sandbox.data.n3rgy.com
 probes:
-  - {url: 'https://api-v2.data.n3rgy.com/mcp', status: 404}
-  - {url: 'https://api-v2.data.n3rgy.com/.well-known/oauth-protected-resource', status: 404}
-  - {url: 'https://api-v2.data.n3rgy.com/.well-known/oauth-authorization-server', status: 404}
-  - {registry: npm, query: n3rgy, result: one community REST client, no MCP server}
-
+- url: https://api-v2.data.n3rgy.com/mcp
+  status: 404
+- url: https://api-v2.data.n3rgy.com/.well-known/oauth-protected-resource
+  status: 404
+- url: https://api-v2.data.n3rgy.com/.well-known/oauth-authorization-server
+  status: 404
+- registry: npm
+  query: n3rgy
+  result: one community REST client
+  no MCP server: null
 safety_notes:
   read_only:
-    - list_consented_mpxns
-    - list_utilities_for_mpxn
-    - list_reading_types
-    - find_mpxn
-    - find_mpxn_by_address
-    - get_update_frequencies
-    - get_reading_data
-    - list_devices
-    - get_device
-    - get_push_configuration
-    - get_push_status
-    - get_property_elements
+  - list_consented_mpxns
+  - list_utilities_for_mpxn
+  - list_reading_types
+  - find_mpxn
+  - find_mpxn_by_address
+  - get_update_frequencies
+  - get_reading_data
+  - list_devices
+  - get_device
+  - get_push_configuration
+  - get_push_status
+  - get_property_elements
   quota_consuming:
-    - {tool: update_now, reason: decrements a per-combination daily counter; a retry burns quota}
-    - {tool: read_inventory, reason: consumes the 1,000,000/day processed-entries threshold and mints a new job uuid}
+  - tool: update_now
+    reason: decrements a per-combination daily counter; a retry burns quota
+  - tool: read_inventory
+    reason: consumes the 1
+    0: null
+    000/day processed-entries threshold and mints a new job uuid: null
   destructive:
-    - delete_device
-    - delete_device_data
-    - delete_push_configuration
-    - reset_all_update_frequencies
+  - delete_device
+  - delete_device_data
+  - delete_push_configuration
+  - reset_all_update_frequencies
   estate_wide:
-    - {tool: reset_all_update_frequencies, reason: forces the change across EVERY consented HAN, not one property}
-    - {tool: set_defaults, reason: changes account-level defaults}
-
+  - tool: reset_all_update_frequencies
+    reason: forces the change across EVERY consented HAN
+    not one property: null
+  - tool: set_defaults
+    reason: changes account-level defaults
 tools:
-  - name: list_consented_mpxns
-    description: List every property (MPxN) this API key holds an active consent for, newest consent first.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveConsentedMPxNs
-  - name: list_utilities_for_mpxn
-    description: List which utilities (electricity, gas) have smart meters on the HAN behind an MPxN.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveConsentedMPxNUtilities
-  - name: list_reading_types
-    description: List which reading types (consumption, production, tariff) are available for a utility at a property.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveDataTypesForUtility
-  - name: get_reading_data
-    description: Retrieve half-hourly or daily consumption, production or tariff data for a utility at a property.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveDataForReadingType
-  - name: update_now
-    description: Force an on-demand fetch of the latest readings from the meter for one utility/reading-type combination.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#generateFetchNowRequest
-  - name: find_mpxn
-    description: Check whether an MPxN and its devices are reachable through an SMSO (DCC or Secure).
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveMPxNAvailability
-  - name: find_mpxn_by_address
-    description: Resolve a UK post code plus partial address to the most recently commissioned meter at that premises.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#mpxnFromAddress
-  - name: get_update_frequencies
-    description: Read the configured data update frequencies for the utilities at a consented property.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveDataUpdateFrequencies
-  - name: set_meter_update_frequency
-    description: Set the import and/or export data update frequency for a specific meter.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#SetMeterUpdateFrequency
-  - name: set_defaults
-    description: Set the account-level default update frequencies and history-data flag applied to new consents.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#SetDefaults
-  - name: reset_all_update_frequencies
-    description: Force new update frequencies across every already-consented HAN on the account.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#ResetAllUpdateFrequencies
-  - name: read_inventory
-    description: Start an asynchronous DCC device-inventory job for up to 200 MPxNs, UPRNs or device IDs; returns a result URI.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#ReadInventory
-  - name: create_export_profiles
-    description: Create export profiles on the legacy V1 solution.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#CreateExportProfiles
-  - name: add_device
-    description: Register a non-SMETS (non-DCC) device in the upload inventory.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#addDevice
-  - name: list_devices
-    description: List the non-SMETS devices registered in the upload inventory.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#listDevices
-  - name: get_device
-    description: Retrieve one non-SMETS device from the upload inventory.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#getDevice
-  - name: update_device
-    description: Update an existing non-SMETS device in the upload inventory.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#updateDevice
-  - name: delete_device
-    description: Delete a non-SMETS device from the upload inventory.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#deleteDevice
-  - name: upload_device_data
-    description: Upload reading data for a registered non-SMETS device.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#uploadData
-  - name: delete_device_data
-    description: Delete a time range of uploaded reading data for a non-SMETS device.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#deleteData
-  - name: get_push_configuration
-    description: Read the account's push-notification endpoint and device-type subscriptions.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#GetPushNotificationConfiguration
-  - name: set_push_configuration
-    description: Create or replace the push-notification endpoint and subscriptions (replaces all existing configuration).
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#EditPushNotificationConfiguration
-  - name: delete_push_configuration
-    description: Delete the account's push-notification configuration.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#DeletePushNotificationConfiguration
-  - name: get_push_status
-    description: Read the outcome (HTTP status, body, timestamp) of the most recent push-notification delivery attempt.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrievePushNotificationStatus
-  - name: get_property_elements
-    description: Internal — retrieve the property elements for an MPxN/utility/reading type.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrievePropertyElements
-    internal: true
-  - name: get_reading_type_data
-    description: Internal — retrieve reading-type data for an MPxN/utility/reading type.
-    source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveReadingTypeData
-    internal: true
-    note: The only operation in the contract with an EMPTY security array.
-
+- name: list_consented_mpxns
+  description: List every property (MPxN) this API key holds an active consent for, newest consent first.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveConsentedMPxNs
+- name: list_utilities_for_mpxn
+  description: List which utilities (electricity, gas) have smart meters on the HAN behind an MPxN.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveConsentedMPxNUtilities
+- name: list_reading_types
+  description: List which reading types (consumption, production, tariff) are available for a utility
+    at a property.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveDataTypesForUtility
+- name: get_reading_data
+  description: Retrieve half-hourly or daily consumption, production or tariff data for a utility at a
+    property.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveDataForReadingType
+- name: update_now
+  description: Force an on-demand fetch of the latest readings from the meter for one utility/reading-type
+    combination.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#generateFetchNowRequest
+- name: find_mpxn
+  description: Check whether an MPxN and its devices are reachable through an SMSO (DCC or Secure).
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveMPxNAvailability
+- name: find_mpxn_by_address
+  description: Resolve a UK post code plus partial address to the most recently commissioned meter at
+    that premises.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#mpxnFromAddress
+- name: get_update_frequencies
+  description: Read the configured data update frequencies for the utilities at a consented property.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveDataUpdateFrequencies
+- name: set_meter_update_frequency
+  description: Set the import and/or export data update frequency for a specific meter.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#SetMeterUpdateFrequency
+- name: set_defaults
+  description: Set the account-level default update frequencies and history-data flag applied to new consents.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#SetDefaults
+- name: reset_all_update_frequencies
+  description: Force new update frequencies across every already-consented HAN on the account.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#ResetAllUpdateFrequencies
+- name: read_inventory
+  description: Start an asynchronous DCC device-inventory job for up to 200 MPxNs, UPRNs or device IDs;
+    returns a result URI.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#ReadInventory
+- name: create_export_profiles
+  description: Create export profiles on the legacy V1 solution.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#CreateExportProfiles
+- name: add_device
+  description: Register a non-SMETS (non-DCC) device in the upload inventory.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#addDevice
+- name: list_devices
+  description: List the non-SMETS devices registered in the upload inventory.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#listDevices
+- name: get_device
+  description: Retrieve one non-SMETS device from the upload inventory.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#getDevice
+- name: update_device
+  description: Update an existing non-SMETS device in the upload inventory.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#updateDevice
+- name: delete_device
+  description: Delete a non-SMETS device from the upload inventory.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#deleteDevice
+- name: upload_device_data
+  description: Upload reading data for a registered non-SMETS device.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#uploadData
+- name: delete_device_data
+  description: Delete a time range of uploaded reading data for a non-SMETS device.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#deleteData
+- name: get_push_configuration
+  description: Read the account's push-notification endpoint and device-type subscriptions.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#GetPushNotificationConfiguration
+- name: set_push_configuration
+  description: Create or replace the push-notification endpoint and subscriptions (replaces all existing
+    configuration).
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#EditPushNotificationConfiguration
+- name: delete_push_configuration
+  description: Delete the account's push-notification configuration.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#DeletePushNotificationConfiguration
+- name: get_push_status
+  description: Read the outcome (HTTP status, body, timestamp) of the most recent push-notification delivery
+    attempt.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrievePushNotificationStatus
+- name: get_property_elements
+  description: Internal — retrieve the property elements for an MPxN/utility/reading type.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrievePropertyElements
+  internal: true
+- name: get_reading_type_data
+  description: Internal — retrieve reading-type data for an MPxN/utility/reading type.
+  source_operation: openapi/n3rgy-customer-service-api-v2-openapi.yaml#RetrieveReadingTypeData
+  internal: true
+  note: The only operation in the contract with an EMPTY security array.
 crosswalk: mcp/n3rgy-tool-crosswalk.yml
+deployment:
+  mode: none
+  verified: derived
+  tools: 26
+  checked: '2026-08-12'
+  source: catalog MCP census
