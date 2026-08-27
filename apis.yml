@@ -33,31 +33,16 @@ created: '2026-07-27'
 modified: '2026-07-27'
 specificationVersion: '0.23'
 apis:
-- aid: n3rgy:customer-service-api-v2
-  name: n3rgy Customer Service API V2
-  description: >-
-    The consent-scoped smart-meter data API of the n3rgy platform. A business holding a valid
-    n3rgy API key lists the properties (MPxNs) it has active consent for, discovers which
-    utilities (electricity, gas) and reading types (consumption, production, tariff) are
-    available for each, and retrieves the underlying half-hourly data. The same contract also
-    covers meter update-frequency control, MPxN and address lookup, read-inventory / firmware
-    and last-communications checks, on-demand "update now" fetches, push-notification
-    configuration, and an upload/devices surface for non-DCC device data. Every operation is
-    secured with the x-api-key header; consent-bearing operations additionally validate that
-    an active consent exists for the HAN behind the given MPxN. A free sandbox with
-    demonstration MPxNs mirrors the live contract on a separate host.
+- aid: n3rgy:n3rgy-create-export-profiles-api
+  name: n3rgy Create Export Profiles API
+  description: The Create Export Profiles API from n3rgy — 1 operation(s) for create export profiles.
   humanURL: https://customer-api-user-manuals.data.n3rgy.com/
   baseURL: https://api-v2.data.n3rgy.com
   tags:
-  - Smart Metering
-  - Consumption
-  - Tariff
-  - Consent
-  - Electricity
-  - Gas
+  - Create Export Profiles
   properties:
   - type: OpenAPI
-    url: openapi/n3rgy-customer-service-api-v2-openapi.yaml
+    url: openapi/n3rgy-create-export-profiles-api-openapi.yml
   - type: Documentation
     url: https://customer-api-user-manuals.data.n3rgy.com/
   - type: APIReference
@@ -78,8 +63,6 @@ apis:
     url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
   - type: SignUp
     url: https://data.n3rgy.com/business-sign-up
-  - type: Overlay
-    url: overlays/n3rgy-customer-service-api-v2-overlay.yaml
   - type: Sandbox
     url: sandbox/n3rgy-sandbox.yml
   - type: Conventions
@@ -94,13 +77,569 @@ apis:
     url: data-model/n3rgy-data-model.yml
   - type: Webhooks
     url: asyncapi/n3rgy-push-notifications-webhooks.yml
-  - type: MCPServer
-    url: mcp/n3rgy-mcp.yml
   - type: ToolCrosswalk
     url: mcp/n3rgy-tool-crosswalk.yml
-  - type: AgentSkill
-    url: skills/_index.yml
+- aid: n3rgy:n3rgy-customer-service-api-v2-api
+  name: n3rgy Customer Service API V2 API
+  description: The Customer Service API V2 API from n3rgy — 1 operation(s) for customer service api v2.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Customer Service API V2
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-customer-service-api-v2-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-find-mpxn-api
+  name: n3rgy Find Mpxn API
+  description: The Find Mpxn API from n3rgy — 2 operation(s) for find mpxn.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Find Mpxn
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-find-mpxn-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-get-update-frequencies-api
+  name: n3rgy Get Update Frequencies API
+  description: The Get Update Frequencies API from n3rgy — 1 operation(s) for get update frequencies.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Get Update Frequencies
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-get-update-frequencies-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-internal-api
+  name: n3rgy Internal API
+  description: The Internal API from n3rgy — 1 operation(s) for internal.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Internal
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-internal-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-mpxn-api
+  name: n3rgy Mpxn API
+  description: The Mpxn API from n3rgy — 3 operation(s) for mpxn.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Mpxn
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-mpxn-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-push-api
+  name: n3rgy Push API
+  description: The Push API from n3rgy — 2 operation(s) for push.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Push
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-push-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-read-inventory-api
+  name: n3rgy Read Inventory API
+  description: The Read Inventory API from n3rgy — 1 operation(s) for read inventory.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Read Inventory
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-read-inventory-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-reset-all-update-frequencies-api
+  name: n3rgy Reset All Update Frequencies API
+  description: >-
+    The Reset All Update Frequencies API from n3rgy — 1 operation(s) for reset all update frequencies.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Reset All Update Frequencies
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-reset-all-update-frequencies-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-set-defaults-api
+  name: n3rgy Set Defaults API
+  description: The Set Defaults API from n3rgy — 1 operation(s) for set defaults.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Set Defaults
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-set-defaults-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-set-meter-update-frequency-api
+  name: n3rgy Set Meter Update Frequency API
+  description: >-
+    The Set Meter Update Frequency API from n3rgy — 1 operation(s) for set meter update frequency.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Set Meter Update Frequency
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-set-meter-update-frequency-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-update-now-api
+  name: n3rgy Update Now API
+  description: The Update Now API from n3rgy — 1 operation(s) for update now.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Update Now
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-update-now-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
+- aid: n3rgy:n3rgy-upload-api
+  name: n3rgy Upload API
+  description: The Upload API from n3rgy — 4 operation(s) for upload.
+  humanURL: https://customer-api-user-manuals.data.n3rgy.com/
+  baseURL: https://api-v2.data.n3rgy.com
+  tags:
+  - Upload
+  properties:
+  - type: OpenAPI
+    url: openapi/n3rgy-upload-api-openapi.yml
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/
+  - type: APIReference
+    url: https://customer-api-user-manuals.data.n3rgy.com/api-specification/
+  - type: Authentication
+    url: https://customer-api-user-manuals.data.n3rgy.com/authentication/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/schemas/
+  - type: Sandbox
+    url: https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/electricity-format/
+  - type: Documentation
+    url: https://customer-api-user-manuals.data.n3rgy.com/gas-format/
+  - type: ChangeLog
+    url: https://customer-api-user-manuals.data.n3rgy.com/change-log/
+  - type: SignUp
+    url: https://data.n3rgy.com/business-sign-up
+  - type: Sandbox
+    url: sandbox/n3rgy-sandbox.yml
+  - type: Conventions
+    url: conventions/n3rgy-conventions.yml
+  - type: ErrorCatalog
+    url: errors/n3rgy-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/n3rgy-rate-limits.yml
+  - type: Examples
+    url: examples/_index.yml
+  - type: DataModel
+    url: data-model/n3rgy-data-model.yml
+  - type: Webhooks
+    url: asyncapi/n3rgy-push-notifications-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/n3rgy-tool-crosswalk.yml
 common:
+- type: Overlay
+  url: overlays/n3rgy-customer-service-api-v2-overlay.yaml
+- type: MCPServer
+  url: mcp/n3rgy-mcp.yml
+- type: AgentSkill
+  url: skills/_index.yml
 - type: AgenticAccess
   url: agentic-access/n3rgy-agentic-access.yml
 - type: DomainSecurity
