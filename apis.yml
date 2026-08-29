@@ -17,6 +17,18 @@ description: >-
   right, so nothing here is a Consumer Data Right or Green Button implementation — n3rgy
   publishes no open grid or market data at all, and the formerly public consumer API is,
   by the company's own statement, no longer available.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://www.n3rgy.com/wp-content/uploads/2023/03/Group.png
 tags:
 - Energy
