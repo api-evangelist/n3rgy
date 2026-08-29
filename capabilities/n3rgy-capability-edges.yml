@@ -1,0 +1,36 @@
+slug: n3rgy
+provider: n3rgy
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Power & Water Utilities
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 2
+edges:
+- tag: Mpxn
+  spec_file: n3rgy-mpxn-api-openapi.yml
+  capability_id: BC-3910.30
+  capability_id_l1: BC-3910
+  capability_name: AMI Data Acquisition Operations
+  confidence: 0.75
+  evidence: GET /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType} RetrieveDataForReadingType "Retrieve
+    consumption/ production data"
+  reason: MPxN is the GB supply-point identifier; the operations list consented utilities for a supply
+    point and return consumption/production data from smart meters — advanced metering data acquisition.
+    Some ambiguity between AMI data acquisition and meter reading/validation sub-capabilities.
+- tag: Set Meter Update Frequency
+  spec_file: n3rgy-set-meter-update-frequency-api-openapi.yml
+  capability_id: BC-3910.30
+  capability_id_l1: BC-3910
+  capability_name: AMI Data Acquisition Operations
+  confidence: 0.7
+  evidence: PUT /set-meter-update-frequency SetMeterUpdateFrequency "Set frequency"
+  reason: Controls how often a smart meter's data is collected, i.e. operational configuration of advanced
+    metering data acquisition via the DCC/HAN. Not a pure technical concern since it governs metering
+    data collection cadence.

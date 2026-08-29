@@ -646,6 +646,9 @@ apis:
   - type: ToolCrosswalk
     url: mcp/n3rgy-tool-crosswalk.yml
 common:
+- type: CapabilityMap
+  url: capabilities/n3rgy-capability-edges.yml
+  name: n3rgy Business Capability Map
 - type: Overlay
   url: overlays/n3rgy-customer-service-api-v2-overlay.yaml
 - type: MCPServer
