@@ -1,0 +1,116 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Update Now API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Update Now
+paths:
+  /update-now/mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}:
+    get:
+      operationId: generateFetchNowRequest
+      summary: Update Now Request
+      description: Requests a reading request for the meter with a given MPxN for a given utility and reading type. It will request data from the latest end cache date.
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+          description: The MPxN, which can be either an MPAN or MPRN.
+      - in: path
+        name: utility
+        required: true
+        schema:
+          type: string
+          example: electricity
+          description: The utility type, which can be either ELECTRICITY or GAS.
+      - in: path
+        name: readingType
+        required: true
+        schema:
+          type: string
+          example: IMPORT
+          description: The reading type, which can be either IMPORT, EXPORT or TARIFF.
+      - in: query
+        name: start
+        required: false
+        schema:
+          type: string
+          example: '202205161100'
+        description: Start date to be considered.
+      - in: query
+        name: end
+        required: false
+        schema:
+          type: string
+          example: '202205161100'
+        description: End date to be considered.
+      responses:
+        '200':
+          description: Request accepted.
+        '429':
+          description: Too Many Requests.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsResponse'
+        '403':
+          description: Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Update Now
+components:
+  schemas:
+    TooManyRequestsResponse:
+      description: The API is being accessed over the limit.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Too Many Requests
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

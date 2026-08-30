@@ -1,0 +1,321 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Push API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Push
+paths:
+  /push/configuration:
+    get:
+      operationId: GetPushNotificationConfiguration
+      summary: Get Push Notification Configuration
+      description: Returns the customer current URL and device configurations for the Push Notifications.
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: Success message
+        '403':
+          description: Forbidden. Customer doesn't have permissions to configure Push Notifications.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Push
+    post:
+      operationId: EditPushNotificationConfiguration
+      summary: Edit Push Notification Configuration
+      description: Edits the Push Notification configurations for the customer.
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Request body with details to change push notification configuration.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushNotificationBodyRequest'
+      responses:
+        '200':
+          description: Success message
+        '400':
+          description: Bad request. The request body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden. Customer doesn't have permissions to configure Push Notifications.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Push
+    delete:
+      operationId: DeletePushNotificationConfiguration
+      summary: Delete Push Notification Configuration
+      description: Deletes the Push Notification configurations for the customer.
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: Success message
+        '403':
+          description: Forbidden. Customer doesn't have permissions to configure Push Notifications.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Push
+  /push/status:
+    get:
+      operationId: RetrievePushNotificationStatus
+      summary: Retrieve Push Notification Status
+      description: Returns the customer's last push notification status.
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      responses:
+        200:
+          description: Indicates that the request has succeeded. Retrieves the data for the last push notification status for the given customer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AMRDevice'
+        '403':
+          description: Forbidden. Customer doesn't have permissions to configure Push Notifications.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Forbidden. No data for the customer's push notification status is present in the system.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NotFoundPushNotificationResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Push
+components:
+  schemas:
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    AMRDevice:
+      allOf:
+      - type: object
+        properties:
+          hanId:
+            description: This is the property identifier. Will be generated when a new device is added. This field shall not be specified for create or update operations. Shall only be defined on read operations.
+            type: string
+            example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
+      - $ref: '#/components/schemas/UploadDevice'
+    NotFoundPushNotificationResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 404
+              message:
+                type: string
+                description: error message
+                example: No records for push notification status found at this time.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    UploadDevice:
+      type: object
+      required:
+      - deviceId
+      - deviceManufacturer
+      - importMPxN
+      - smso
+      properties:
+        commissionedDate:
+          description: 'The date in which the device was commissioned in UTC ISO8601 format (e.g.: 2023-01-24T05:29:36Z). If no time of the day is provided, it will default to midnight (2023-01-24Z).'
+          type: string
+          format: date
+          example: '2023-01-24T05:29:36Z'
+        deviceId:
+          description: Unique Identifier that can identify the device to the user. It will be the MAC address in the case of a SMETS device, and it will be the meter serial number in the case of an AMR device.
+          type: string
+          example: 0CA2F400005CDFA3
+        deviceManufacturer:
+          description: Identifies the meter manufacturer name.
+          type: string
+          example: MyBrand
+        deviceModel:
+          description: Identifies the meter manufacturer model.
+          type: string
+          example: AA.BB.CC
+        deviceStatus:
+          description: The status of the meter.
+          default: UNDEFINED
+          type: string
+          enum:
+          - PENDING
+          - WHITELISTED
+          - INSTALLED_NOT_COMMISSIONED
+          - COMMISSIONED
+          - DECOMMISSIONED
+          - WITHDRAWN
+          - SUSPENDED
+          - RECOVERY
+          - RECOVERED
+          - UNDEFINED
+          example: COMMISSIONED
+        deviceType:
+          description: 'Device type enum. Should follow SMETS standards (e.g.: ESME, GSME, ESME_EXPORT).'
+          type: string
+          enum:
+          - ESME
+          - GSME
+          - ESME_EXPORT
+          example: ESME
+        exportMPAN:
+          description: Meter Point Access Number for export.
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: 9876580000483
+        firmwareVersion:
+          description: The firmware version of the meter.
+          type: string
+          example: 1100EEFF
+        importMPxN:
+          description: Meter Point Identifier Number for import.
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: 9876580000483
+        postCode:
+          description: The post code where the meter is installed.
+          type: string
+          example: SW1A 1AA
+        address:
+          description: The address where the meter is installed.
+          type: string
+          maxLength: 30
+          example: Someones street,7H,York
+        smso:
+          description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
+          type: string
+          example: AMR
+    PushNotificationBodyRequest:
+      type: object
+      properties:
+        URI:
+          type: string
+          description: Indicates the URI given by the customer to receive Push Notifications.
+        ESME:
+          type: array
+          items:
+            type: string
+            enum:
+            - IMPORT
+            - CONSUMPTION
+            - EXPORT
+            - PRODUCTION
+            - TARIFF
+          description: Determines the electricity reading types for which to receive Push Notifications.
+          example:
+          - IMPORT
+          - EXPORT
+        GSME:
+          type: array
+          items:
+            type: string
+            enum:
+            - IMPORT
+            - CONSUMPTION
+            - TARIFF
+          description: Determines the gas reading types for which to receive Push Notifications.
+          example:
+          - IMPORT
+          - TARIFF
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

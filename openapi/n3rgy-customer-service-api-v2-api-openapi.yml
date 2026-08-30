@@ -1,0 +1,133 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Customer Service API V2
+paths:
+  /:
+    get:
+      operationId: RetrieveConsentedMPxNs
+      summary: List consented mpxns
+      description: returns the consented mpxns for a given customer
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: query
+        name: startat
+        schema:
+          type: integer
+        description: consented mpxns are returned from this number onwards
+      - in: query
+        name: maxresults
+        schema:
+          type: integer
+        description: the maximum number of mpxns to be returned for that request
+      responses:
+        '200':
+          description: success message for retrieving consented mpxns request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveConsentedMPxNsSuccessResponse'
+        '400':
+          description: Bad request. There was an error while validating the request parameters.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ParamStartAtErrorResponse'
+                - $ref: '#/components/schemas/ParamMaxResultsErrorResponse'
+        '403':
+          description: Forbidden to access the endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+      tags:
+      - Customer Service API V2
+components:
+  schemas:
+    ParamStartAtErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Parameter startAt must be an integer.
+    ParamMaxResultsErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Parameter maxResults must be an integer.
+    RetrieveConsentedMPxNsSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: /
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: '2020-11-10T17:07:01.580Z'
+        startAt:
+          type: integer
+          description: parameter startAt.
+          example: 0
+        maxResults:
+          type: integer
+          description: parameter maxResults.
+          example: 100
+        total:
+          type: integer
+          description: number of MPxNs retrieved.
+          example: 1
+        entries:
+          type: array
+          items:
+            type: string
+            description: consented MPxNs.
+            pattern: '[0-9]{13}||[0-9]{9}'
+            example: '1230267891094'
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

@@ -1,0 +1,223 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Internal API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Internal
+paths:
+  /internal/{mpxn}/{utility}/{readingType}:
+    get:
+      operationId: RetrievePropertyElements
+      summary: Retrieve Property Elements
+      description: Temporary endpoint that validates and returns the primary elements for a specific MPxN, utility and reading type. It always returns 1.
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+          description: The MPxN, which can be either an MPAN or MPRN.
+      - in: path
+        name: utility
+        required: true
+        schema:
+          type: string
+          example: electricity
+          description: The utility type, which can be either electricity or gas.
+      - in: path
+        name: readingType
+        required: true
+        schema:
+          type: string
+          enum:
+          - consumption
+          - production
+          - import
+          - export
+          - tariff
+        description: The reading type.
+      responses:
+        '200':
+          description: Success message for Retrieving Reading data request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveReadingDataSuccessResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+      tags:
+      - Internal
+    post:
+      operationId: RetrieveReadingTypeData
+      summary: Retrieve Reading Type Data
+      description: internal endpoint fetches reading type data a specific MPxN, utility and reading type.
+      security: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+        description: The MPxN, which can be either an MPAN or MPRN.
+      - in: path
+        name: utility
+        required: true
+        schema:
+          type: string
+          enum:
+          - electricity
+          - gas
+        description: The utility type, which can be either electricity or gas.
+      - in: path
+        name: readingType
+        required: true
+        schema:
+          type: string
+          enum:
+          - consumption
+          - production
+          - import
+          - export
+          - tariff
+        description: The reading type.
+      responses:
+        '200':
+          description: Success message for Retrieving Reading data request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveReadingDataSuccessResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+      tags:
+      - Internal
+components:
+  schemas:
+    RetrieveReadingDataSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource used
+          type: string
+          example: /mpxn/1234567891000/utility/electricity/readingType/consumption?start=202203100830&end=202203111230
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: '2022-04-10T17:07:01.580Z'
+        availableCacheRange:
+          description: The timestamp available in the cache table
+          type: object
+          properties:
+            start:
+              description: The minimum start date
+              type: string
+              example: '202104262300'
+            end:
+              description: The maximum end date
+              type: string
+              example: '202204260000'
+        start:
+          description: The start date being used to retrieve data from Dynamo DB
+          type: string
+          example: '202203100830'
+        end:
+          description: The end date being used to retrieve data from Dynamo DB
+          type: string
+          example: '202203111230'
+        granularity:
+          description: The granularity of the response
+          type: string
+          example: halfhour
+        unit:
+          description: The unit of measure for the readings
+          type: string
+          example: kWh
+        devices:
+          description: The devices of the han with all the readings
+          type: array
+          items:
+            type: object
+            properties:
+              deviceId:
+                description: The id of the device
+                type: string
+                example: 01-0A-00-00-00-00-FF-03
+              values:
+                description: The available readings for the device
+                type: array
+                items:
+                  type: object
+                  properties:
+                    primaryValue:
+                      description: The primary value for the reading
+                      type: number
+                      example: 11.183
+                    secondaryValue:
+                      description: The secondary value for the reading
+                      type: number
+                      example: 9.703
+                    timestamp:
+                      description: The timestamp for the reading
+                      type: string
+                      example: '2022-03-10'
+                    totalHHBlocks:
+                      description: The number of half-hour records used in the calculation (when the granularity = day)
+                      type: integer
+                      example: 48
+                    unit:
+                      description: The unit of measure for this specific reading value
+                      type: string
+                      example: kWh
+                    type:
+                      description: The type classification of the reading value
+                      type: string
+                      enum:
+                      - HALF_HOURLY
+                      - TOTAL_BY_PHASE
+                      - TOTAL
+                      - REVERSE
+                      - Q4
+                      - Q3
+                      - Q2
+                      - Q1
+                      - Q3-Q2
+                      - Q3+Q4
+                      - Q2-Q3
+                      - Q2+Q4
+                      - Q2+Q3
+                      - Q1-Q4
+                      - Q1+Q4
+                      - Q1+Q3
+                      - Q1+Q2
+                      - NET
+                      - LEADING
+                      - FORWARD
+                      - LAGGING
+                      example: TOTAL
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

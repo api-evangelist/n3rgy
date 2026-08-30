@@ -1,0 +1,173 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Get Update Frequencies API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Get Update Frequencies
+paths:
+  /get-update-frequencies/{mpxn}:
+    get:
+      operationId: RetrieveDataUpdateFrequencies
+      summary: Get frequency
+      description: Returns the values of the data update frequency for the utility types in one of the consented HANs
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+        description: The MPxN, which can be either an MPAN or MPRN.
+      responses:
+        '200':
+          description: Success message for Retrieving update frequencies request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveDataUpdateFrequenciesSuccessResponse'
+        '400':
+          description: Bad request. The MPxN is absent or in invalid format.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Success message for Retrieving update frequencies request.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ConsentNotFoundResponse'
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Get Update Frequencies
+components:
+  schemas:
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    ConsentNotFoundError:
+      description: Consent Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: Consent for the given MPxN not found.
+    ConsentNotFoundResponse:
+      description: Response when the Consent was not found for the given MPxN.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ConsentNotFoundError'
+          - description: List of errors.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    RetrieveDataUpdateFrequenciesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: get-update-frequencies/1234567891001
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: '2020-11-10T17:07:01.580Z'
+        status:
+          type: integer
+          description: The request's status code.
+          example: 200
+        utilities:
+          type: array
+          items:
+            type: object
+            properties:
+              utilityType:
+                type: string
+                description: The utility type
+                example: Electricity
+              devices:
+                description: The devices of the han with the utility type
+                type: array
+                items:
+                  type: object
+                  properties:
+                    deviceId:
+                      type: string
+                      description: The id of the device
+                      example: 01-0A-00-00-00-00-FF-03
+                    updateType:
+                      type: string
+                      description: The utility type plus reading type
+                      example: electricity#import
+                    updateFrequency:
+                      type: string
+                      description: The update frequency for the update type
+                      example: 24h
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

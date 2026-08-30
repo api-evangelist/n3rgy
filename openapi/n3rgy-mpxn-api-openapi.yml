@@ -1,0 +1,459 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Mpxn API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Mpxn
+paths:
+  /mpxn/{mpxn}:
+    get:
+      operationId: RetrieveConsentedMPxNUtilities
+      summary: List utilities for MPxN
+      description: Returns the utilities list for the consented MPxN
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+        description: The MPxN, which can be either an MPAN or MPRN.
+      responses:
+        '200':
+          description: Success message for Retrieving Utilities request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveUtilitiesSuccessResponse'
+        '400':
+          description: Bad request. There was an error while validating the request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden to access the endpoint or no consent found for the customer
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ConsentNotFoundResponse'
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+      tags:
+      - Mpxn
+  /mpxn/{mpxn}/utility/{utility}:
+    get:
+      operationId: RetrieveDataTypesForUtility
+      summary: List types for utility in MPxN
+      description: Returns the data types of an utility in a consented MPxN
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+        description: The MPxN, which can be either an MPAN or MPRN.
+      - in: path
+        name: utility
+        required: true
+        schema:
+          type: string
+          example: electricity
+        description: The utility type, which can be either electricity or gas.
+      - in: query
+        name: includeCheckMeter
+        required: false
+        schema:
+          type: boolean
+          default: false
+        description: Indicates whether to include check meter information in the response.
+      responses:
+        '200':
+          description: Success message for Retrieving Reading Types request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveReadingTypesSuccessResponse'
+        '400':
+          description: The MPxN is in an invalid format or the utility has an invalid value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden to access the endpoint or consent not found for the given MPxN
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ConsentNotFoundResponse'
+                - $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: No available information for the specified utility in the HAN associated with the received MPxN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MPxNNotAssociatedWithAHANError'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+      tags:
+      - Mpxn
+  /mpxn/{mpxn}/utility/{utility}/readingtype/{readingType}:
+    get:
+      operationId: RetrieveDataForReadingType
+      summary: Retrieve consumption/ production data
+      description: Returns data for consumptions/productions for a specific MPxN, utility and reading type
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: mpxn
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+        description: The MPxN, which can be either an MPAN or MPRN.
+      - in: path
+        name: utility
+        required: true
+        schema:
+          type: string
+          enum:
+          - electricity
+          - gas
+        description: The utility type of the meter.
+      - in: path
+        name: readingType
+        required: true
+        schema:
+          type: string
+          enum:
+          - consumption
+          - production
+          - import
+          - export
+          - tariff
+          - READ_INSTANTANEOUS_IMPORT_REGISTERS
+          - READ_INSTANTANEOUS_EXPORT_REGISTERS
+          - RETRIEVE_IMPORT_DAILY_READ_LOG
+          - RETRIEVE_EXPORT_DAILY_READ_LOG
+          - RETRIEVE_DAILY_CONSUMPTION_LOG
+        description: The reading type.
+      - in: query
+        name: start
+        schema:
+          type: string
+          example: '202205161100'
+        description: Start date to be considered.
+      - in: query
+        name: end
+        schema:
+          type: string
+          example: '202205161100'
+        description: End date to be considered.
+      - in: query
+        name: granularity
+        schema:
+          type: string
+          enum:
+          - halfhour
+          - day
+        description: Time granularity to be considered.
+      - in: query
+        name: outputFormat
+        schema:
+          type: string
+          enum:
+          - json
+          - csv
+        description: Output format to be considered.
+      - in: query
+        name: includeCheckMeter
+        required: false
+        schema:
+          type: boolean
+          default: false
+        description: Indicates whether to include check meter information in the response.
+      responses:
+        '200':
+          description: Success message for Retrieving Reading data request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveReadingDataSuccessResponse'
+        '403':
+          description: Forbidden to access the endpoint or no consent found for the customer
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ConsentNotFoundResponse'
+                - $ref: '#/components/schemas/ForbiddenResponse'
+        '400':
+          description: Bad request. There was an error while validating the request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '404':
+          description: No available information for the specified utility in the HAN associated with the received MPxN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MPxNNotAssociatedWithAHANError'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerDataServiceApiV2Function.Arn}/invocations
+      tags:
+      - Mpxn
+components:
+  schemas:
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    RetrieveUtilitiesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource with the MPxN
+          type: string
+          example: /mpxn/1234567891012
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: '2022-04-10T17:07:01.580Z'
+        entries:
+          description: The utilities of the han
+          type: array
+          items:
+            type: string
+          example: '[''electricity'', ''gas'']'
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    MPxNNotAssociatedWithAHANError:
+      description: Mpxn not associated with any HAN.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: The received MPxN is associated with a device that is not associated to any premises.
+    RetrieveReadingTypesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource with the MPxN
+          type: string
+          example: /mpxn/1234567891012
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: '2022-04-10T17:07:01.580Z'
+        devices:
+          description: The devices of the han with reading types
+          type: array
+          items:
+            type: object
+            properties:
+              deviceId:
+                description: The id of the device
+                type: string
+                example: 01-0A-00-00-00-00-FF-03
+              availableDataTypes:
+                description: The available reading types of the device
+                type: array
+                items:
+                  type: string
+                example: '[''consumption'', ''tariff'']'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    ConsentNotFoundError:
+      description: Consent Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: Consent for the given MPxN not found.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    ConsentNotFoundResponse:
+      description: Response when the Consent was not found for the given MPxN.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ConsentNotFoundError'
+          - description: List of errors.
+    RetrieveReadingDataSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource used
+          type: string
+          example: /mpxn/1234567891000/utility/electricity/readingType/consumption?start=202203100830&end=202203111230
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: '2022-04-10T17:07:01.580Z'
+        availableCacheRange:
+          description: The timestamp available in the cache table
+          type: object
+          properties:
+            start:
+              description: The minimum start date
+              type: string
+              example: '202104262300'
+            end:
+              description: The maximum end date
+              type: string
+              example: '202204260000'
+        start:
+          description: The start date being used to retrieve data from Dynamo DB
+          type: string
+          example: '202203100830'
+        end:
+          description: The end date being used to retrieve data from Dynamo DB
+          type: string
+          example: '202203111230'
+        granularity:
+          description: The granularity of the response
+          type: string
+          example: halfhour
+        unit:
+          description: The unit of measure for the readings
+          type: string
+          example: kWh
+        devices:
+          description: The devices of the han with all the readings
+          type: array
+          items:
+            type: object
+            properties:
+              deviceId:
+                description: The id of the device
+                type: string
+                example: 01-0A-00-00-00-00-FF-03
+              values:
+                description: The available readings for the device
+                type: array
+                items:
+                  type: object
+                  properties:
+                    primaryValue:
+                      description: The primary value for the reading
+                      type: number
+                      example: 11.183
+                    secondaryValue:
+                      description: The secondary value for the reading
+                      type: number
+                      example: 9.703
+                    timestamp:
+                      description: The timestamp for the reading
+                      type: string
+                      example: '2022-03-10'
+                    totalHHBlocks:
+                      description: The number of half-hour records used in the calculation (when the granularity = day)
+                      type: integer
+                      example: 48
+                    unit:
+                      description: The unit of measure for this specific reading value
+                      type: string
+                      example: kWh
+                    type:
+                      description: The type classification of the reading value
+                      type: string
+                      enum:
+                      - HALF_HOURLY
+                      - TOTAL_BY_PHASE
+                      - TOTAL
+                      - REVERSE
+                      - Q4
+                      - Q3
+                      - Q2
+                      - Q1
+                      - Q3-Q2
+                      - Q3+Q4
+                      - Q2-Q3
+                      - Q2+Q4
+                      - Q2+Q3
+                      - Q1-Q4
+                      - Q1+Q4
+                      - Q1+Q3
+                      - Q1+Q2
+                      - NET
+                      - LEADING
+                      - FORWARD
+                      - LAGGING
+                      example: TOTAL
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

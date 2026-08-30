@@ -1,0 +1,181 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Reset All Update Frequencies API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Reset All Update Frequencies
+paths:
+  /reset-all-update-frequencies:
+    put:
+      operationId: ResetAllUpdateFrequencies
+      summary: Reset all
+      description: Sets new update frequencies for all consented HANs.
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Request body with the new values for values for electricity_import_update_frequency, electricity_export_update_frequency and gas_update_frequency.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequestRequiredElectricityImport'
+              - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequestRequiredElectricityExport'
+              - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequestRequiredGasImport'
+      responses:
+        '200':
+          description: Success message for reset all update frequencies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetAllUpdateFrequenciesSuccessResponse'
+        '400':
+          description: Bad request. There was an error while validating request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestBodyResponse'
+        '403':
+          description: Forbidden to access the endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Reset All Update Frequencies
+components:
+  schemas:
+    ResetAllUpdateFrequenciesRequestRequiredGasImport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - gasUpdateFrequency
+    BadRequestBodyResponse:
+      description: Invalid request body.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 400
+              message:
+                type: string
+                description: error message
+                example: At least one body parameter must be provided.
+    ResetAllUpdateFrequenciesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: /reset-all-update-frequencies
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: '2020-11-10T17:07:01.580Z'
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status.
+              example: OK
+            message:
+              type: string
+              description: Success's message.
+              example: Request to reset update frequencies was successful.
+    ResetAllUpdateFrequenciesRequestRequiredElectricityExport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - electricityExportUpdateFrequency
+    ResetAllUpdateFrequenciesRequestRequiredElectricityImport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - electricityImportUpdateFrequency
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    ResetAllUpdateFrequenciesRequest:
+      type: object
+      properties:
+        electricityImportUpdateFrequency:
+          type: string
+          description: Determines the frequency of import data updates for electric meters in the property.
+          enum:
+          - never
+          - 3h
+          - 6h
+          - 12h
+          - 24h
+          - weekly
+          - monthly
+          example: never
+        electricityExportUpdateFrequency:
+          type: string
+          description: Determines the frequency of export data updates for electric meters in the property.
+          enum:
+          - never
+          - 3h
+          - 6h
+          - 12h
+          - 24h
+          - weekly
+          - monthly
+          example: never
+        gasUpdateFrequency:
+          type: string
+          description: Determines the frequency of data updates for gas meters in the property.
+          enum:
+          - never
+          - 3h
+          - 6h
+          - 12h
+          - 24h
+          - weekly
+          - monthly
+          example: never
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

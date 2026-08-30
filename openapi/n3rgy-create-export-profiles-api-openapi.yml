@@ -1,0 +1,110 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Create Export Profiles API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Create Export Profiles
+paths:
+  /create-export-profiles:
+    post:
+      operationId: CreateExportProfiles
+      summary: Creates export profiles on the V1 solution.
+      description: Allows the user to request the creation of Export Profiles on the V1 solution
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateExportProfilesRequest'
+      responses:
+        '200':
+          description: Success message for Create Export Profiles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateExportProfilesSuccessResponse'
+        '202':
+          description: Success message for Create Export Profiles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateExportProfilesAcceptedResponse'
+        '429':
+          description: Bad request. The request body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsResponse'
+        '403':
+          description: Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Create Export Profiles
+components:
+  schemas:
+    TooManyRequestsResponse:
+      description: The API is being accessed over the limit.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Too Many Requests
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    CreateExportProfilesRequest:
+      type: array
+      items:
+        type: string
+      description: Array of MPxN values. Each value must be between 1 and 13 digits.
+    CreateExportProfilesSuccessResponse:
+      type: string
+      description: Empty body response
+    CreateExportProfilesAcceptedResponse:
+      type: array
+      items:
+        type: string
+      description: Array of MPxN values. Each value must be between 1 and 13 digits. That failed to create an export profiles
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

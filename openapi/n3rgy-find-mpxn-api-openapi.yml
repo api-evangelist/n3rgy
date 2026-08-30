@@ -1,0 +1,267 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Find Mpxn API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Find Mpxn
+paths:
+  /find-mpxn/{identifier}:
+    get:
+      operationId: RetrieveMPxNAvailability
+      summary: Find MPxN
+      description: Returns the availability for consent of a device associated with the MPxN
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: identifier
+        required: true
+        schema:
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: '1234567891002'
+        description: The MPxN, which can be either an MPAN or MPRN.
+      - name: checkAmr
+        in: query
+        required: false
+        schema:
+          type: boolean
+          example: true
+      responses:
+        '200':
+          description: Success message for Retrieving Availability request.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - description: Response when checkAmr is false or not provided
+                  $ref: '#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse'
+                - description: Response when checkAmr is true (returns a list of objects)
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse'
+        '400':
+          description: Bad request. There was an error while validating the request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParamMPxNErrorResponse'
+        '403':
+          description: Forbidden to access the endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: There is no available information of meters associated with the received MPxN, or MPxN not associated with a HAN
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NotFoundMpxnResponse'
+                - $ref: '#/components/schemas/MPxNNotAssociatedWithAHANError'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Find Mpxn
+  /find-mpxn/{identifier}/{address}:
+    get:
+      operationId: mpxnFromAddress
+      summary: Find MPxN by address
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          example: C2A+2EE
+      - name: address
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 22A
+      - name: checkAmr
+        in: query
+        required: false
+        schema:
+          type: boolean
+          example: true
+      responses:
+        '200':
+          description: Success message for Retrieving Availability request.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - description: Response when checkAmr is false or not provided
+                  $ref: '#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse'
+                - description: Response when checkAmr is false or not provided
+                  type: array
+                  $ref: '#/components/schemas/RetrieveMPxNAvailabilitySuccessResponse'
+        '400':
+          description: Bad request. There was an error while validating the request parameters or more than a single HAN returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParamMPxNErrorResponse'
+        '403':
+          description: Forbidden to access the endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: There is no available information of meters associated with the received address.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NotFoundMpxnResponse'
+                - $ref: '#/components/schemas/MPxNNotAssociatedWithAHANError'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Find Mpxn
+components:
+  schemas:
+    MPxNNotAssociatedWithAHANError:
+      description: Mpxn not associated with any HAN.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: The received MPxN is associated with a device that is not associated to any premises.
+    RetrieveMPxNAvailabilitySuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path
+          example: /
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created
+          example: '2020-11-10T17:07:01.580Z'
+        mpxn:
+          type: string
+          description: Path parameter MPxN
+          example: '1230267891094'
+        deviceType:
+          type: string
+          description: The device type
+          example: ESME
+        deviceId:
+          description: The device id
+          type: string
+          example: 01-0A-00-00-00-00-FF-03
+        deviceStatus:
+          type: string
+          description: The device status
+          example: Commissioned
+        deviceManufacturer:
+          type: string
+          description: The device manufacturer code
+          example: 106C
+        deviceModel:
+          type: string
+          description: The device model
+          example: 10E2A100
+        deviceGbcsVersion:
+          type: string
+          description: The device gbcs version
+          example: '3.2'
+        deviceFirmwareVersion:
+          type: string
+          description: The device firmware version
+          example: 0314B600
+        smetsChtsVersion:
+          type: string
+          description: The device smets chts version
+          example: V4.2
+        multipleMatchingResults:
+          type: boolean
+          description: True when more than one meter for meter type is found for the given HAN (e.g. two ESMEs)
+        propertyFilter:
+          type: object
+          properties:
+            postCode:
+              description: The post code where the meter is installed
+              type: string
+              example: SW1A 1AA
+            addressIdentifier:
+              description: The address where the meter is installed
+              type: string
+              maxLength: 30
+              example: Someones street,7H,York
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    NotFoundMpxnResponse:
+      description: Response when the MPxN was not found or not associated with a HAN.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/NotFoundMpxnError'
+          - description: List of errors.
+    ParamMPxNErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: An MPxN must be provided, and must be a value between 1 and 13 digits.
+    NotFoundMpxnError:
+      description: Mpxn Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 404.
+            format: int32
+            type: integer
+            example: 404
+          message:
+            description: Error message.
+            type: string
+            example: There is no available information of meters associated with the received MPxN.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

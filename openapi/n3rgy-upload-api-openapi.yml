@@ -1,0 +1,661 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Upload API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Upload
+paths:
+  /upload/data/deviceid/{deviceId}/readingtype/{readingType}:
+    post:
+      summary: Upload data to device.
+      description: Uploads data into a device identified by its deviceId.
+      operationId: uploadData
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: deviceId
+        description: Device Identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 0CA2F400005CDFA3
+      - name: readingType
+        description: Type of the reading being imported. Tariffs not supported. Consumption and import are alias, same for production and export.
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - consumption
+          - production
+          - import
+          - export
+          - READ_INSTANTANEOUS_IMPORT_REGISTERS
+          - READ_INSTANTANEOUS_EXPORT_REGISTERS
+          - RETRIEVE_IMPORT_DAILY_READ_LOG
+          - RETRIEVE_EXPORT_DAILY_READ_LOG
+          - RETRIEVE_DAILY_CONSUMPTION_LOG
+          example: import
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MeteredValues'
+        required: true
+      responses:
+        200:
+          description: Indicates that the request has succeeded. Data stored for a device identified by the deviceId.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings or values. Notice that the values are numeric.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        404:
+          description: Not Found. The provided deviceId does not match a device.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Device not found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+  /upload/data/deviceid/{deviceId}/readingtype/{readingType}/starttime/{startTime}/endtime/{endTime}:
+    delete:
+      summary: Deletes data from a device.
+      description: Deletes data from a device identified by its deviceId. Data to be purged are type and time bounded.
+      operationId: deleteData
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: deviceId
+        description: Device Identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 0CA2F400005CDFA3
+      - name: readingType
+        description: Type of the reading being imported. Tariffs not supported. Consumption and import are alias, same for production and export.
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - consumption
+          - production
+          - import
+          - export
+          example: import
+      - name: startTime
+        description: Date/time from which the values will be deleted (in the ISO8601 format).
+        in: path
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2023-01-24 05:29:36+00:00
+      - name: endTime
+        description: Date/time till which the values will be deleted (in the ISO8601 format).
+        in: path
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2023-01-25 05:29:36+00:00
+      responses:
+        200:
+          description: Indicates that the request has succeeded. Data deleted for a device identified by the deviceId.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        404:
+          description: Not Found. The provided deviceId does not match a device.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Device not found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+  /upload/devices/:
+    post:
+      summary: Adds a new non-SMETS device to the inventory.
+      description: 'Adds a new non-SMETS device to the inventory.
+
+        The given device shall not specify the hanId, as it will be generated by the service.
+
+        The device fields will be verified for match with the customer permission specified in customer-extended-permissions.uploadsAccessFilter.
+
+        If it doesn''t match then operation will be forbidden.
+
+        '
+      operationId: addDevice
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadDevice'
+        required: true
+      responses:
+        200:
+          description: Indicates that the request has succeeded. The inventory data was updated accordingly.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  deviceId:
+                    type: string
+                    example: 0CA2F400005CDFA3
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check the schema for the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        409:
+          description: Conflict. The request could not be completed due to a conflict with the current state of the resource. The device already exists in the inventory. To update it use PUT method instead.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Device already exists
+                  conflictingDeviceId:
+                    type: string
+                    example: 0CA2F400005CDFA3
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+    get:
+      summary: Retrieves a list of devices from the inventory.
+      description: Retrieves a list of devices from the inventory. Only devices matching with the customer permission specified in customer-extended-permissions.uploadsAccessFilter will be retrieved.
+      operationId: listDevices
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: startAt
+        description: Start position index.
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 0
+      - name: maxResults
+        description: Max number of records to be returned.
+        in: query
+        schema:
+          type: integer
+          minimum: 10
+          multipleOf: 10
+          default: 500
+          example: 1000
+      responses:
+        200:
+          description: Indicates that the request has succeeded. Retrieves a list of devices.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AMRDevice'
+        204:
+          description: No Content. The request was fulfilled, but no information to retrieve in the response body. The StartAt parameter might be exceeding the total number of records.
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+  /upload/devices/deviceid/{deviceId}:
+    get:
+      summary: Retrieves a device from the inventory.
+      description: Retrieves a device from the inventory. Only devices matching with the customer permission specified in customer-extended-permissions.uploadsAccessFilter will be retrieved.
+      operationId: getDevice
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: deviceId
+        description: Device Identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 0CA2F400005CDFA3
+      responses:
+        200:
+          description: Indicates that the request has succeeded. Retrieves a device identified by the deviceId.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AMRDevice'
+        204:
+          description: No Content. The request was fulfilled, but no information to retrieve in the response body. The StartAt parameter might be exceeding the total number of records.
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        404:
+          description: Not Found. The provided deviceId does not match a device.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Device not found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+    put:
+      summary: Updates an existing non-SMETS device in the inventory.
+      description: Updates an existing non-SMETS device to the inventory. The given device shall not specify the hanId. The device fields will be verified for match with the customer permission specified in customer-extended-permissions.uploadsAccessFilter. If it doesn't match then operation will be forbidden. Both new and old fields values must be checked.
+      operationId: updateDevice
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: deviceId
+        description: Device Identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 0CA2F400005CDFA3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadDevice'
+        required: true
+      responses:
+        200:
+          description: Indicates that the request has succeeded. Updated a device identified by the deviceId.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: updated
+                  deviceId:
+                    type: string
+                    example: 0CA2F400005CDFA3
+        204:
+          description: No Content. The request was fulfilled, but no information to retrieve in the response body. The inventory data was updated accordingly.
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings or values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        404:
+          description: Not Found. The provided deviceId does not match a device.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Device not found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+    delete:
+      summary: Deletes a non-SMETS device from the inventory
+      description: Deletes a non-SMETS device from the inventory, identified by the deviceId. The device fields will be verified for a match with the customer permission specified in customer-extended-permissions.uploadsAccessFilter. If it doesn't match then the operation will be forbidden.
+      operationId: deleteDevice
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: deviceId
+        description: Device Identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 0CA2F400005CDFA3
+      responses:
+        200:
+          description: Indicates that the request has succeeded. A device entry will be returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: deleted
+        400:
+          description: Bad request. The request has incorrect syntax and should not repeat without modifications. Check parameter settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        403:
+          description: Unauthorized request. The client does not have access rights to the content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        404:
+          description: Not Found. The provided deviceId does not match a device.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Device not found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Upload
+components:
+  schemas:
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    AMRDevice:
+      allOf:
+      - type: object
+        properties:
+          hanId:
+            description: This is the property identifier. Will be generated when a new device is added. This field shall not be specified for create or update operations. Shall only be defined on read operations.
+            type: string
+            example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
+      - $ref: '#/components/schemas/UploadDevice'
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    UploadDevice:
+      type: object
+      required:
+      - deviceId
+      - deviceManufacturer
+      - importMPxN
+      - smso
+      properties:
+        commissionedDate:
+          description: 'The date in which the device was commissioned in UTC ISO8601 format (e.g.: 2023-01-24T05:29:36Z). If no time of the day is provided, it will default to midnight (2023-01-24Z).'
+          type: string
+          format: date
+          example: '2023-01-24T05:29:36Z'
+        deviceId:
+          description: Unique Identifier that can identify the device to the user. It will be the MAC address in the case of a SMETS device, and it will be the meter serial number in the case of an AMR device.
+          type: string
+          example: 0CA2F400005CDFA3
+        deviceManufacturer:
+          description: Identifies the meter manufacturer name.
+          type: string
+          example: MyBrand
+        deviceModel:
+          description: Identifies the meter manufacturer model.
+          type: string
+          example: AA.BB.CC
+        deviceStatus:
+          description: The status of the meter.
+          default: UNDEFINED
+          type: string
+          enum:
+          - PENDING
+          - WHITELISTED
+          - INSTALLED_NOT_COMMISSIONED
+          - COMMISSIONED
+          - DECOMMISSIONED
+          - WITHDRAWN
+          - SUSPENDED
+          - RECOVERY
+          - RECOVERED
+          - UNDEFINED
+          example: COMMISSIONED
+        deviceType:
+          description: 'Device type enum. Should follow SMETS standards (e.g.: ESME, GSME, ESME_EXPORT).'
+          type: string
+          enum:
+          - ESME
+          - GSME
+          - ESME_EXPORT
+          example: ESME
+        exportMPAN:
+          description: Meter Point Access Number for export.
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: 9876580000483
+        firmwareVersion:
+          description: The firmware version of the meter.
+          type: string
+          example: 1100EEFF
+        importMPxN:
+          description: Meter Point Identifier Number for import.
+          type: string
+          pattern: '[0-9]{13}||[0-9]{9}'
+          example: 9876580000483
+        postCode:
+          description: The post code where the meter is installed.
+          type: string
+          example: SW1A 1AA
+        address:
+          description: The address where the meter is installed.
+          type: string
+          maxLength: 30
+          example: Someones street,7H,York
+        smso:
+          description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
+          type: string
+          example: AMR
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    MeteredValues:
+      type: object
+      required:
+      - timestamp
+      properties:
+        timestamp:
+          description: Timestamp of the reading in the ISO8601 format.
+          type: string
+          format: date
+          example: '2020-11-10T17:07:01.580Z'
+        primaryValue:
+          description: The consumption/production reading of the meter. It should be a decimal with a decimal point.
+          type: number
+          format: double
+          example: 0.25
+        secondaryValue:
+          description: In hybrid meters should be filled with the second element consumption/production. It should be a decimal with a decimal point.
+          type: number
+          format: double
+          example: 0.25
+        additionalInformation:
+          description: 'A textual information that may be relevant for the given timestamp. Only a set of values are acceptable. The values will be translated into: VALID_VALUE = "" INVALID_VALUE = "invalid value" VALUE_NOT_AVAILABLE_IN_SMSO = "value not available in SMSO" INVALID_TIMESTAMP = "invalid timestamp"'
+          type: string
+          enum:
+          - VALID_VALUE
+          - INVALID_VALUE
+          - VALUE_NOT_AVAILABLE_IN_SMSO
+          - INVALID_TIMESTAMP
+          example: VALID_VALUE
+        type:
+          description: The type classification of the reading value
+          type: string
+          enum:
+          - HALF_HOURLY
+          - TOTAL_BY_PHASE
+          - TOTAL
+          - REVERSE
+          - Q4
+          - Q3
+          - Q2
+          - Q1
+          - Q3-Q2
+          - Q3+Q4
+          - Q2-Q3
+          - Q2+Q4
+          - Q2+Q3
+          - Q1-Q4
+          - Q1+Q4
+          - Q1+Q3
+          - Q1+Q2
+          - NET
+          - LEADING
+          - FORWARD
+          - LAGGING
+          example: TOTAL
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

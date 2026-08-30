@@ -1,0 +1,156 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Read Inventory API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Read Inventory
+paths:
+  /read-inventory:
+    post:
+      operationId: ReadInventory
+      summary: Read smart meter inventory
+      description: Allows the user to request to DCC the list of Devices and WAN Matrix for a MPxN, UPRN or Device ID
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: query
+        name: last-communications
+        schema:
+          type: boolean
+        description: Triggers a last communications request. The asynchronous data received by the json file will contain the information about the last communications date.
+      - in: query
+        name: check-firmware
+        schema:
+          type: boolean
+        description: Triggers a check firmware version request.
+      - in: query
+        name: deviceType
+        schema:
+          type: string
+          example: ESME
+        description: Specifies a device type for the check firmware request. Admissible values ['ESME','GSME']
+      requestBody:
+        description: Request body with information to Read Inventory values.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadInventoryBodyRequest'
+      responses:
+        '200':
+          description: Success message for Read Inventory request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadInventorySuccessResponseNoQueryParams'
+        '400':
+          description: Bad request. The request body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Read Inventory
+components:
+  schemas:
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    ReadInventoryBodyRequest:
+      type: object
+      properties:
+        mpxns:
+          type: array
+          items:
+            type: string
+          description: Array of MPxN values. Each value must be between 1 and 13 digits.
+        uprns:
+          type: array
+          items:
+            type: string
+          description: Array of UPRN values. Each value must be an integer with up to 12 digits.
+        deviceIds:
+          type: array
+          items:
+            type: string
+          description: Array of Device IDs. Each value must match the pattern of an EUI-64 identifier (XX-XX-XX-XX-XX-XX-XX-XX, where X is an hexadecimal character (a digit 0 to 9 or a letter a to f, or A to F).
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    ReadInventorySuccessResponseNoQueryParams:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status of the submitted request.
+          example: 200
+        uuid:
+          type: string
+          description: Universally unique identifier for each request being processed.
+          example: 46ff4ffd-cfb0-4705-acaa-14a780973540
+        uri:
+          type: string
+          description: URI (Uniform Resource Identifier) for the file containing the results of the query being processed.
+          example: https://46ff4ffd-cfb0-4705-acaa-14a780973540.json
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

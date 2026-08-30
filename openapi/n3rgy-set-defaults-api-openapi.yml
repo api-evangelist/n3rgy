@@ -1,0 +1,235 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Set Defaults API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Set Defaults
+paths:
+  /set-defaults:
+    put:
+      operationId: SetDefaults
+      summary: Set defaults
+      description: Allows updating account default values for the update frequency of meter readings and if historic data should be recovered after a consent.
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Request body with information to change default values.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDefaultsBodyRequest'
+      responses:
+        '200':
+          description: Success message for Set Defaults request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetDefaultsSuccessResponse'
+        '400':
+          description: Bad request. The request body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden. AWS authentication is invalid or customer doesn't have the right permissions to update frequencies values.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ForbiddenResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Set Defaults
+components:
+  schemas:
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    SetDefaultsSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: /set-defaults
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: '2022-04-10T17:07:01.580Z'
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status
+              example: OK
+            message:
+              type: string
+              description: The request's message
+              example: Request to reset default(s) in customer profile was successful.
+    SetDefaultsBodyRequest:
+      type: object
+      properties:
+        getHistoryData:
+          type: string
+          enum:
+          - 'true'
+          - 'false'
+          description: Indicates if historic data should be obtained from the meters in a consented HAN.
+        electricityImportUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - 3H
+          - 6H
+          - 12H
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of import data updates for electric meters in a consented HAN.
+        electricityExportUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - 3H
+          - 6H
+          - 12H
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of export data updates for electric meters in a consented HAN.
+        gasUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - 3H
+          - 6H
+          - 12H
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of data updates for gas meters in a consented HAN.
+        electricityInstantaneousRegistersImportUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of instantaneous registers import data updates for electric meters in a consented HAN.
+        electricityInstantaneousRegistersExportUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of instantaneous registers export data updates for electric meters in a consented HAN.
+        gasInstantaneousRegistersImportUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of instantaneous registers import data updates for gas meters in a consented HAN.
+        electricityImportDailyReadLogUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of daily read log import data updates for electric meters in a consented HAN.
+        electricityExportDailyReadLogUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of daily read log export data updates for electric meters in a consented HAN.
+        electricityDailyConsumptionLogUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of consumption log data updates for electric meters in a consented HAN.
+        gasDailyConsumptionLogUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of consumption log data updates for gas meters in a consented HAN.
+        gasImportDailyReadLogUpdateFrequency:
+          type: string
+          enum:
+          - NEVER
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          description: Determines the frequency of daily read log import data updates for gas meters in a consented HAN.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER

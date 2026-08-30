@@ -1,0 +1,174 @@
+openapi: 3.2.0
+info:
+  title: Customer Service API V2 Set Meter Update Frequency API
+  description: Customer Service API V2.
+  version: '1.0'
+  contact:
+    name: N3rgy Support
+    email: support@n3rgy.com
+servers:
+- url: https://api-v2.data.n3rgy.com
+  description: Live API
+- url: https://api-v2-sandbox.data.n3rgy.com
+  description: Sandbox API
+tags:
+- name: Set Meter Update Frequency
+paths:
+  /set-meter-update-frequency:
+    put:
+      operationId: SetMeterUpdateFrequency
+      summary: Set frequency
+      description: Sets the update frequencies for a specific meter in one of the consented HANs
+      security:
+      - ApiKeyAuth: []
+      parameters: []
+      requestBody:
+        description: Body parameters to specify the Device ID of the target meter and the values for import/export update frequency
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetMeterUpdateFrequencyBody'
+      responses:
+        '200':
+          description: Success message for Set Meter Update Frequency request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetMeterUpdateFrequencySuccessResponse'
+        '403':
+          description: Forbidden to access the endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetMeterUpdateFrequencyForbiddenResponseList'
+        '400':
+          description: Example of bad request response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetMeterUpdateFrequencyBadRequestResponseList'
+        '404':
+          description: Example of not found response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetMeterUpdateFrequencyNotFoundResponseList'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CustomerServiceApiV2Function.Arn}/invocations
+      tags:
+      - Set Meter Update Frequency
+components:
+  schemas:
+    SetMeterUpdateFrequencyBody:
+      type: object
+      properties:
+        deviceID:
+          type: string
+          description: Device ID of the meter whose update frequencies are to be set.
+          example: 01-02-03-04-05-06-07-08
+        importUpdateFrequency:
+          type: string
+          description: '(Optional) Determines the frequency of data updates for electric meters in a consented HAN. One of: NEVER, H_2, H_3, H_6, H_12, DAILY, WEEKLY, MONTHLY.'
+          example: H_2
+        exportUpdateFrequency:
+          type: string
+          description: '(Optional) Determines the frequency of data updates for electric meters in a consented HAN. One of: NEVER, H_2, H_3, H_6, H_12, DAILY, WEEKLY, MONTHLY.'
+          example: H_2
+    SetMeterUpdateFrequencyBadRequestResponseList:
+      description: List for a bad request response.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/SetMeterUpdateFrequencyBadRequestResponse'
+          - description: List of errors.
+    SetMeterUpdateFrequencyNotFoundResponseList:
+      description: List for a not found  response.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/SetMeterUpdateFrequencyNotFoundResponse'
+          - description: List of errors.
+    SetMeterUpdateFrequencyForbiddenResponse:
+      description: Bad request response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: User is not authorized to access this resource with an explicit deny.
+    SetMeterUpdateFrequencyBadRequestResponse:
+      description: Bad request response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 400.
+            format: int32
+            type: integer
+            example: 400
+          message:
+            description: Error message.
+            type: string
+            example: The specified deviceID does not correspond to a meter.
+    SetMeterUpdateFrequencySuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: /set-meter-update-frequency
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: '2020-11-10T17:07:01.580Z'
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status.
+              example: OK
+            message:
+              type: string
+              description: The request's message.
+              example: Request to reset update frequency for the meter was successful.
+    SetMeterUpdateFrequencyNotFoundResponse:
+      description: Not found response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 404.
+            format: int32
+            type: integer
+            example: 404
+          message:
+            description: Error message.
+            type: string
+            example: The specified deviceID is not associated with a consented HAN.
+    SetMeterUpdateFrequencyForbiddenResponseList:
+      description: List for a bad request response.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/SetMeterUpdateFrequencyForbiddenResponse'
+          - description: List of errors.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      x-amazon-apigateway-api-key-source: HEADER
