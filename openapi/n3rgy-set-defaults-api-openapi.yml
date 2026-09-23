@@ -58,47 +58,10 @@ paths:
       - Set Defaults
 components:
   schemas:
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
     ListBadRequestDto:
       type: array
       items:
         $ref: '#/components/schemas/BadRequestErrorDto'
-    BadRequestErrorDto:
-      description: Represents the Bad Request error element.
-      type: object
-      properties:
-        code:
-          format: int32
-          description: HTTP status code.
-          type: integer
-          example: 400
-        message:
-          description: Error message.
-          type: string
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
     SetDefaultsSuccessResponse:
       type: object
       properties:
@@ -121,6 +84,23 @@ components:
               type: string
               description: The request's message
               example: Request to reset default(s) in customer profile was successful.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
     SetDefaultsBodyRequest:
       type: object
       properties:
@@ -227,6 +207,26 @@ components:
           - WEEKLY
           - MONTHLY
           description: Determines the frequency of daily read log import data updates for gas meters in a consented HAN.
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

@@ -60,80 +60,6 @@ paths:
       - Reset All Update Frequencies
 components:
   schemas:
-    ResetAllUpdateFrequenciesRequestRequiredGasImport:
-      allOf:
-      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
-      type: object
-      required:
-      - gasUpdateFrequency
-    BadRequestBodyResponse:
-      description: Invalid request body.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 400
-              message:
-                type: string
-                description: error message
-                example: At least one body parameter must be provided.
-    ResetAllUpdateFrequenciesSuccessResponse:
-      type: object
-      properties:
-        resource:
-          type: string
-          description: The request's resource path.
-          example: /reset-all-update-frequencies
-        responseTimestamp:
-          type: string
-          description: The timestamp when this response was created.
-          example: '2020-11-10T17:07:01.580Z'
-        status:
-          type: object
-          properties:
-            code:
-              type: string
-              description: The request's status.
-              example: OK
-            message:
-              type: string
-              description: Success's message.
-              example: Request to reset update frequencies was successful.
-    ResetAllUpdateFrequenciesRequestRequiredElectricityExport:
-      allOf:
-      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
-      type: object
-      required:
-      - electricityExportUpdateFrequency
-    ResetAllUpdateFrequenciesRequestRequiredElectricityImport:
-      allOf:
-      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
-      type: object
-      required:
-      - electricityImportUpdateFrequency
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
     ResetAllUpdateFrequenciesRequest:
       type: object
       properties:
@@ -173,6 +99,80 @@ components:
           - weekly
           - monthly
           example: never
+    ResetAllUpdateFrequenciesRequestRequiredElectricityExport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - electricityExportUpdateFrequency
+    ResetAllUpdateFrequenciesRequestRequiredElectricityImport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - electricityImportUpdateFrequency
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    ResetAllUpdateFrequenciesRequestRequiredGasImport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - gasUpdateFrequency
+    ResetAllUpdateFrequenciesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: The request's resource path.
+          example: /reset-all-update-frequencies
+        responseTimestamp:
+          type: string
+          description: The timestamp when this response was created.
+          example: '2020-11-10T17:07:01.580Z'
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The request's status.
+              example: OK
+            message:
+              type: string
+              description: Success's message.
+              example: Request to reset update frequencies was successful.
+    BadRequestBodyResponse:
+      description: Invalid request body.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 400
+              message:
+                type: string
+                description: error message
+                example: At least one body parameter must be provided.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

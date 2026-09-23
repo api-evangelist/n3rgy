@@ -74,14 +74,42 @@ paths:
       - Read Inventory
 components:
   schemas:
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    ReadInventorySuccessResponseNoQueryParams:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status of the submitted request.
+          example: 200
+        uuid:
+          type: string
+          description: Universally unique identifier for each request being processed.
+          example: 46ff4ffd-cfb0-4705-acaa-14a780973540
+        uri:
+          type: string
+          description: URI (Uniform Resource Identifier) for the file containing the results of the query being processed.
+          example: https://46ff4ffd-cfb0-4705-acaa-14a780973540.json
+    ForbiddenResponse:
+      description: AWS authentication invalid.
       type: object
       properties:
         errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
     ReadInventoryBodyRequest:
       type: object
       properties:
@@ -100,10 +128,14 @@ components:
           items:
             type: string
           description: Array of Device IDs. Each value must match the pattern of an EUI-64 identifier (XX-XX-XX-XX-XX-XX-XX-XX, where X is an hexadecimal character (a digit 0 to 9 or a letter a to f, or A to F).
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
     BadRequestErrorDto:
       description: Represents the Bad Request error element.
       type: object
@@ -116,38 +148,6 @@ components:
         message:
           description: Error message.
           type: string
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
-    ReadInventorySuccessResponseNoQueryParams:
-      type: object
-      properties:
-        status:
-          type: integer
-          description: Status of the submitted request.
-          example: 200
-        uuid:
-          type: string
-          description: Universally unique identifier for each request being processed.
-          example: 46ff4ffd-cfb0-4705-acaa-14a780973540
-        uri:
-          type: string
-          description: URI (Uniform Resource Identifier) for the file containing the results of the query being processed.
-          example: https://46ff4ffd-cfb0-4705-acaa-14a780973540.json
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

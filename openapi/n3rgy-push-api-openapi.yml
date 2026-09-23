@@ -138,56 +138,42 @@ paths:
       - Push
 components:
   schemas:
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
-    AMRDevice:
-      allOf:
-      - type: object
-        properties:
-          hanId:
-            description: This is the property identifier. Will be generated when a new device is added. This field shall not be specified for create or update operations. Shall only be defined on read operations.
-            type: string
-            example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
-      - $ref: '#/components/schemas/UploadDevice'
-    NotFoundPushNotificationResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 404
-              message:
-                type: string
-                description: error message
-                example: No records for push notification status found at this time.
     ListBadRequestDto:
       type: array
       items:
         $ref: '#/components/schemas/BadRequestErrorDto'
-    BadRequestErrorDto:
-      description: Represents the Bad Request error element.
+    PushNotificationBodyRequest:
       type: object
       properties:
-        code:
-          format: int32
-          description: HTTP status code.
-          type: integer
-          example: 400
-        message:
-          description: Error message.
+        URI:
           type: string
+          description: Indicates the URI given by the customer to receive Push Notifications.
+        ESME:
+          type: array
+          items:
+            type: string
+            enum:
+            - IMPORT
+            - CONSUMPTION
+            - EXPORT
+            - PRODUCTION
+            - TARIFF
+          description: Determines the electricity reading types for which to receive Push Notifications.
+          example:
+          - IMPORT
+          - EXPORT
+        GSME:
+          type: array
+          items:
+            type: string
+            enum:
+            - IMPORT
+            - CONSUMPTION
+            - TARIFF
+          description: Determines the gas reading types for which to receive Push Notifications.
+          example:
+          - IMPORT
+          - TARIFF
     UploadDevice:
       type: object
       required:
@@ -264,38 +250,15 @@ components:
           description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
           type: string
           example: AMR
-    PushNotificationBodyRequest:
-      type: object
-      properties:
-        URI:
-          type: string
-          description: Indicates the URI given by the customer to receive Push Notifications.
-        ESME:
-          type: array
-          items:
+    AMRDevice:
+      allOf:
+      - type: object
+        properties:
+          hanId:
+            description: This is the property identifier. Will be generated when a new device is added. This field shall not be specified for create or update operations. Shall only be defined on read operations.
             type: string
-            enum:
-            - IMPORT
-            - CONSUMPTION
-            - EXPORT
-            - PRODUCTION
-            - TARIFF
-          description: Determines the electricity reading types for which to receive Push Notifications.
-          example:
-          - IMPORT
-          - EXPORT
-        GSME:
-          type: array
-          items:
-            type: string
-            enum:
-            - IMPORT
-            - CONSUMPTION
-            - TARIFF
-          description: Determines the gas reading types for which to receive Push Notifications.
-          example:
-          - IMPORT
-          - TARIFF
+            example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
+      - $ref: '#/components/schemas/UploadDevice'
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -313,6 +276,43 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    NotFoundPushNotificationResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 404
+              message:
+                type: string
+                description: error message
+                example: No records for push notification status found at this time.
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

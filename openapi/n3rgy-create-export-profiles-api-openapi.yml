@@ -17,7 +17,7 @@ paths:
   /create-export-profiles:
     post:
       operationId: CreateExportProfiles
-      summary: Creates export profiles on the V1 solution.
+      summary: Creates export profiles on the V1 solution
       description: Allows the user to request the creation of Export Profiles on the V1 solution
       security:
       - ApiKeyAuth: []
@@ -72,6 +72,9 @@ components:
           description: Error message.
           type: string
           example: Too Many Requests
+    CreateExportProfilesSuccessResponse:
+      type: string
+      description: Empty body response
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -89,19 +92,16 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
-    CreateExportProfilesRequest:
-      type: array
-      items:
-        type: string
-      description: Array of MPxN values. Each value must be between 1 and 13 digits.
-    CreateExportProfilesSuccessResponse:
-      type: string
-      description: Empty body response
     CreateExportProfilesAcceptedResponse:
       type: array
       items:
         type: string
       description: Array of MPxN values. Each value must be between 1 and 13 digits. That failed to create an export profiles
+    CreateExportProfilesRequest:
+      type: array
+      items:
+        type: string
+      description: Array of MPxN values. Each value must be between 1 and 13 digits.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
