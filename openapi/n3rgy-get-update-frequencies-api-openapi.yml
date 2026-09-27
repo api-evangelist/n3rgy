@@ -60,10 +60,23 @@ paths:
       - Get Update Frequencies
 components:
   schemas:
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
     RetrieveDataUpdateFrequenciesSuccessResponse:
       type: object
       properties:
@@ -114,23 +127,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/ConsentNotFoundError'
           - description: List of errors.
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
     ConsentNotFoundError:
       description: Consent Not Found error.
       type: array
@@ -153,6 +149,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/ListBadRequestDto'
           - description: List of errors.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
     BadRequestErrorDto:
       description: Represents the Bad Request error element.
       type: object

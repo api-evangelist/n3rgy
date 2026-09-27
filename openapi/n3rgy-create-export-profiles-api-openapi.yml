@@ -64,17 +64,6 @@ paths:
       - Create Export Profiles
 components:
   schemas:
-    TooManyRequestsResponse:
-      description: The API is being accessed over the limit.
-      type: object
-      properties:
-        message:
-          description: Error message.
-          type: string
-          example: Too Many Requests
-    CreateExportProfilesSuccessResponse:
-      type: string
-      description: Empty body response
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -92,6 +81,17 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
+    TooManyRequestsResponse:
+      description: The API is being accessed over the limit.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Too Many Requests
+    CreateExportProfilesSuccessResponse:
+      type: string
+      description: Empty body response
     CreateExportProfilesAcceptedResponse:
       type: array
       items:

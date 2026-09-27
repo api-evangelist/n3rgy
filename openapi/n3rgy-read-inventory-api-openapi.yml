@@ -74,25 +74,6 @@ paths:
       - Read Inventory
 components:
   schemas:
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
-    ReadInventorySuccessResponseNoQueryParams:
-      type: object
-      properties:
-        status:
-          type: integer
-          description: Status of the submitted request.
-          example: 200
-        uuid:
-          type: string
-          description: Universally unique identifier for each request being processed.
-          example: 46ff4ffd-cfb0-4705-acaa-14a780973540
-        uri:
-          type: string
-          description: URI (Uniform Resource Identifier) for the file containing the results of the query being processed.
-          example: https://46ff4ffd-cfb0-4705-acaa-14a780973540.json
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -136,6 +117,25 @@ components:
           allOf:
           - $ref: '#/components/schemas/ListBadRequestDto'
           - description: List of errors.
+    ReadInventorySuccessResponseNoQueryParams:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status of the submitted request.
+          example: 200
+        uuid:
+          type: string
+          description: Universally unique identifier for each request being processed.
+          example: 46ff4ffd-cfb0-4705-acaa-14a780973540
+        uri:
+          type: string
+          description: URI (Uniform Resource Identifier) for the file containing the results of the query being processed.
+          example: https://46ff4ffd-cfb0-4705-acaa-14a780973540.json
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
     BadRequestErrorDto:
       description: Represents the Bad Request error element.
       type: object

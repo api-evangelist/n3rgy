@@ -470,65 +470,23 @@ paths:
       - Upload
 components:
   schemas:
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
-    MeteredValues:
+    ForbiddenResponse:
+      description: AWS authentication invalid.
       type: object
-      required:
-      - timestamp
       properties:
-        timestamp:
-          description: Timestamp of the reading in the ISO8601 format.
-          type: string
-          format: date
-          example: '2020-11-10T17:07:01.580Z'
-        primaryValue:
-          description: The consumption/production reading of the meter. It should be a decimal with a decimal point.
-          type: number
-          format: double
-          example: 0.25
-        secondaryValue:
-          description: In hybrid meters should be filled with the second element consumption/production. It should be a decimal with a decimal point.
-          type: number
-          format: double
-          example: 0.25
-        additionalInformation:
-          description: 'A textual information that may be relevant for the given timestamp. Only a set of values are acceptable. The values will be translated into: VALID_VALUE = "" INVALID_VALUE = "invalid value" VALUE_NOT_AVAILABLE_IN_SMSO = "value not available in SMSO" INVALID_TIMESTAMP = "invalid timestamp"'
-          type: string
-          enum:
-          - VALID_VALUE
-          - INVALID_VALUE
-          - VALUE_NOT_AVAILABLE_IN_SMSO
-          - INVALID_TIMESTAMP
-          example: VALID_VALUE
-        type:
-          description: The type classification of the reading value
-          type: string
-          enum:
-          - HALF_HOURLY
-          - TOTAL_BY_PHASE
-          - TOTAL
-          - REVERSE
-          - Q4
-          - Q3
-          - Q2
-          - Q1
-          - Q3-Q2
-          - Q3+Q4
-          - Q2-Q3
-          - Q2+Q4
-          - Q2+Q3
-          - Q1-Q4
-          - Q1+Q4
-          - Q1+Q3
-          - Q1+Q2
-          - NET
-          - LEADING
-          - FORWARD
-          - LAGGING
-          example: TOTAL
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
     UploadDevice:
       type: object
       required:
@@ -605,6 +563,14 @@ components:
           description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
           type: string
           example: AMR
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
     AMRDevice:
       allOf:
       - type: object
@@ -614,31 +580,10 @@ components:
             type: string
             example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
       - $ref: '#/components/schemas/UploadDevice'
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
     BadRequestErrorDto:
       description: Represents the Bad Request error element.
       type: object
@@ -651,6 +596,61 @@ components:
         message:
           description: Error message.
           type: string
+    MeteredValues:
+      type: object
+      required:
+      - timestamp
+      properties:
+        timestamp:
+          description: Timestamp of the reading in the ISO8601 format.
+          type: string
+          format: date
+          example: '2020-11-10T17:07:01.580Z'
+        primaryValue:
+          description: The consumption/production reading of the meter. It should be a decimal with a decimal point.
+          type: number
+          format: double
+          example: 0.25
+        secondaryValue:
+          description: In hybrid meters should be filled with the second element consumption/production. It should be a decimal with a decimal point.
+          type: number
+          format: double
+          example: 0.25
+        additionalInformation:
+          description: 'A textual information that may be relevant for the given timestamp. Only a set of values are acceptable. The values will be translated into: VALID_VALUE = "" INVALID_VALUE = "invalid value" VALUE_NOT_AVAILABLE_IN_SMSO = "value not available in SMSO" INVALID_TIMESTAMP = "invalid timestamp"'
+          type: string
+          enum:
+          - VALID_VALUE
+          - INVALID_VALUE
+          - VALUE_NOT_AVAILABLE_IN_SMSO
+          - INVALID_TIMESTAMP
+          example: VALID_VALUE
+        type:
+          description: The type classification of the reading value
+          type: string
+          enum:
+          - HALF_HOURLY
+          - TOTAL_BY_PHASE
+          - TOTAL
+          - REVERSE
+          - Q4
+          - Q3
+          - Q2
+          - Q1
+          - Q3-Q2
+          - Q3+Q4
+          - Q2-Q3
+          - Q2+Q4
+          - Q2+Q3
+          - Q1-Q4
+          - Q1+Q4
+          - Q1+Q3
+          - Q1+Q2
+          - NET
+          - LEADING
+          - FORWARD
+          - LAGGING
+          example: TOTAL
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
