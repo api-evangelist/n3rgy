@@ -62,39 +62,6 @@ paths:
       - Customer Service API V2
 components:
   schemas:
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
-    ParamMaxResultsErrorResponse:
-      description: Response for the Customer Service Api V2 HTTP Bad Request error.
-      type: object
-      properties:
-        message:
-          description: Error message.
-          type: string
-          example: Parameter maxResults must be an integer.
-    ParamStartAtErrorResponse:
-      description: Response for the Customer Service Api V2 HTTP Bad Request error.
-      type: object
-      properties:
-        message:
-          description: Error message.
-          type: string
-          example: Parameter startAt must be an integer.
     RetrieveConsentedMPxNsSuccessResponse:
       type: object
       properties:
@@ -125,6 +92,39 @@ components:
             description: consented MPxNs.
             pattern: '[0-9]{13}||[0-9]{9}'
             example: '1230267891094'
+    ParamMaxResultsErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Parameter maxResults must be an integer.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    ParamStartAtErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: Parameter startAt must be an integer.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

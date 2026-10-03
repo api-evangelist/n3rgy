@@ -138,7 +138,24 @@ paths:
       - Push
 components:
   schemas:
-    ForbiddenResponse:
+    AMRDevice:
+      allOf:
+      - type: object
+        properties:
+          hanId:
+            description: This is the property identifier. Will be generated when a new device is added. This field shall not be specified for create or update operations. Shall only be defined on read operations.
+            type: string
+            example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
+      - $ref: '#/components/schemas/UploadDevice'
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
+    NotFoundPushNotificationResponse:
       description: AWS authentication invalid.
       type: object
       properties:
@@ -150,11 +167,23 @@ components:
               code:
                 type: integer
                 description: response status's code
-                example: 403
+                example: 404
               message:
                 type: string
                 description: error message
-                example: User is not authorized to access this resource with an explicit deny.
+                example: No records for push notification status found at this time.
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
     UploadDevice:
       type: object
       required:
@@ -231,19 +260,11 @@ components:
           description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
           type: string
           example: AMR
-    BadRequestErrorDto:
-      description: Represents the Bad Request error element.
-      type: object
-      properties:
-        code:
-          format: int32
-          description: HTTP status code.
-          type: integer
-          example: 400
-        message:
-          description: Error message.
-          type: string
-    NotFoundPushNotificationResponse:
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
       properties:
@@ -255,32 +276,11 @@ components:
               code:
                 type: integer
                 description: response status's code
-                example: 404
+                example: 403
               message:
                 type: string
                 description: error message
-                example: No records for push notification status found at this time.
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
-    AMRDevice:
-      allOf:
-      - type: object
-        properties:
-          hanId:
-            description: This is the property identifier. Will be generated when a new device is added. This field shall not be specified for create or update operations. Shall only be defined on read operations.
-            type: string
-            example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
-      - $ref: '#/components/schemas/UploadDevice'
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
+                example: User is not authorized to access this resource with an explicit deny.
     PushNotificationBodyRequest:
       type: object
       properties:

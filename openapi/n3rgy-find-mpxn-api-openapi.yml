@@ -142,23 +142,6 @@ paths:
       - Find Mpxn
 components:
   schemas:
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
     NotFoundMpxnError:
       description: Mpxn Not Found error.
       type: array
@@ -173,6 +156,22 @@ components:
             description: Error message.
             type: string
             example: There is no available information of meters associated with the received MPxN.
+    NotFoundMpxnResponse:
+      description: Response when the MPxN was not found or not associated with a HAN.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/NotFoundMpxnError'
+          - description: List of errors.
+    ParamMPxNErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: An MPxN must be provided, and must be a value between 1 and 13 digits.
     RetrieveMPxNAvailabilitySuccessResponse:
       type: object
       properties:
@@ -243,22 +242,23 @@ components:
           description: Error message.
           type: string
           example: The received MPxN is associated with a device that is not associated to any premises.
-    ParamMPxNErrorResponse:
-      description: Response for the Customer Service Api V2 HTTP Bad Request error.
-      type: object
-      properties:
-        message:
-          description: Error message.
-          type: string
-          example: An MPxN must be provided, and must be a value between 1 and 13 digits.
-    NotFoundMpxnResponse:
-      description: Response when the MPxN was not found or not associated with a HAN.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
       type: object
       properties:
         errors:
-          allOf:
-          - $ref: '#/components/schemas/NotFoundMpxnError'
-          - description: List of errors.
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

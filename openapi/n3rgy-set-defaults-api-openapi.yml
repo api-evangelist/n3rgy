@@ -58,23 +58,14 @@ paths:
       - Set Defaults
 components:
   schemas:
-    ForbiddenResponse:
-      description: AWS authentication invalid.
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
       type: object
       properties:
         errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
     SetDefaultsSuccessResponse:
       type: object
       properties:
@@ -97,14 +88,18 @@ components:
               type: string
               description: The request's message
               example: Request to reset default(s) in customer profile was successful.
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
       type: object
       properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
     SetDefaultsBodyRequest:
       type: object
       properties:
@@ -215,18 +210,23 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/BadRequestErrorDto'
-    BadRequestErrorDto:
-      description: Represents the Bad Request error element.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
       type: object
       properties:
-        code:
-          format: int32
-          description: HTTP status code.
-          type: integer
-          example: 400
-        message:
-          description: Error message.
-          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
