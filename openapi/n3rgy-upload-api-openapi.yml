@@ -470,6 +470,22 @@ paths:
       - Upload
 components:
   schemas:
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
     AMRDevice:
       allOf:
       - type: object
@@ -479,14 +495,23 @@ components:
             type: string
             example: A0DA9479AF7E2F486C37B0E23ADFEF4A1D6954214E249A3E9EB1D2EB711C40E7
       - $ref: '#/components/schemas/UploadDevice'
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
       type: object
       properties:
         errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
     MeteredValues:
       type: object
       required:
@@ -542,18 +567,6 @@ components:
           - FORWARD
           - LAGGING
           example: TOTAL
-    BadRequestErrorDto:
-      description: Represents the Bad Request error element.
-      type: object
-      properties:
-        code:
-          format: int32
-          description: HTTP status code.
-          type: integer
-          example: 400
-        message:
-          description: Error message.
-          type: string
     UploadDevice:
       type: object
       required:
@@ -630,27 +643,14 @@ components:
           description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
           type: string
           example: AMR
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
-    ForbiddenResponse:
-      description: AWS authentication invalid.
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
       type: object
       properties:
         errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

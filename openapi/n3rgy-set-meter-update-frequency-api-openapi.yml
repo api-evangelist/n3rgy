@@ -77,34 +77,6 @@ components:
             description: Error message.
             type: string
             example: The specified deviceID is not associated with a consented HAN.
-    SetMeterUpdateFrequencyForbiddenResponse:
-      description: Bad request response.
-      type: array
-      items:
-        properties:
-          code:
-            description: Error code - 403.
-            format: int32
-            type: integer
-            example: 403
-          message:
-            description: Error message.
-            type: string
-            example: User is not authorized to access this resource with an explicit deny.
-    SetMeterUpdateFrequencyBadRequestResponse:
-      description: Bad request response.
-      type: array
-      items:
-        properties:
-          code:
-            description: Error code - 400.
-            format: int32
-            type: integer
-            example: 400
-          message:
-            description: Error message.
-            type: string
-            example: The specified deviceID does not correspond to a meter.
     SetMeterUpdateFrequencyBody:
       type: object
       properties:
@@ -120,6 +92,58 @@ components:
           type: string
           description: '(Optional) Determines the frequency of data updates for electric meters in a consented HAN. One of: NEVER, H_2, H_3, H_6, H_12, DAILY, WEEKLY, MONTHLY.'
           example: H_2
+    SetMeterUpdateFrequencyForbiddenResponseList:
+      description: List for a bad request response.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/SetMeterUpdateFrequencyForbiddenResponse'
+          - description: List of errors.
+    SetMeterUpdateFrequencyForbiddenResponse:
+      description: Bad request response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: User is not authorized to access this resource with an explicit deny.
+    SetMeterUpdateFrequencyNotFoundResponseList:
+      description: List for a not found  response.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/SetMeterUpdateFrequencyNotFoundResponse'
+          - description: List of errors.
+    SetMeterUpdateFrequencyBadRequestResponse:
+      description: Bad request response.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 400.
+            format: int32
+            type: integer
+            example: 400
+          message:
+            description: Error message.
+            type: string
+            example: The specified deviceID does not correspond to a meter.
+    SetMeterUpdateFrequencyBadRequestResponseList:
+      description: List for a bad request response.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/SetMeterUpdateFrequencyBadRequestResponse'
+          - description: List of errors.
     SetMeterUpdateFrequencySuccessResponse:
       type: object
       properties:
@@ -142,30 +166,6 @@ components:
               type: string
               description: The request's message.
               example: Request to reset update frequency for the meter was successful.
-    SetMeterUpdateFrequencyBadRequestResponseList:
-      description: List for a bad request response.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/SetMeterUpdateFrequencyBadRequestResponse'
-          - description: List of errors.
-    SetMeterUpdateFrequencyNotFoundResponseList:
-      description: List for a not found  response.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/SetMeterUpdateFrequencyNotFoundResponse'
-          - description: List of errors.
-    SetMeterUpdateFrequencyForbiddenResponseList:
-      description: List for a bad request response.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/SetMeterUpdateFrequencyForbiddenResponse'
-          - description: List of errors.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

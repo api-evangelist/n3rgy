@@ -60,35 +60,6 @@ paths:
       - Reset All Update Frequencies
 components:
   schemas:
-    ResetAllUpdateFrequenciesRequestRequiredElectricityExport:
-      allOf:
-      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
-      type: object
-      required:
-      - electricityExportUpdateFrequency
-    BadRequestBodyResponse:
-      description: Invalid request body.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 400
-              message:
-                type: string
-                description: error message
-                example: At least one body parameter must be provided.
-    ResetAllUpdateFrequenciesRequestRequiredElectricityImport:
-      allOf:
-      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
-      type: object
-      required:
-      - electricityImportUpdateFrequency
     ResetAllUpdateFrequenciesSuccessResponse:
       type: object
       properties:
@@ -111,29 +82,6 @@ components:
               type: string
               description: Success's message.
               example: Request to reset update frequencies was successful.
-    ResetAllUpdateFrequenciesRequestRequiredGasImport:
-      allOf:
-      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
-      type: object
-      required:
-      - gasUpdateFrequency
-    ForbiddenResponse:
-      description: AWS authentication invalid.
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: integer
-                description: response status's code
-                example: 403
-              message:
-                type: string
-                description: error message
-                example: User is not authorized to access this resource with an explicit deny.
     ResetAllUpdateFrequenciesRequest:
       type: object
       properties:
@@ -173,6 +121,58 @@ components:
           - weekly
           - monthly
           example: never
+    BadRequestBodyResponse:
+      description: Invalid request body.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 400
+              message:
+                type: string
+                description: error message
+                example: At least one body parameter must be provided.
+    ForbiddenResponse:
+      description: AWS authentication invalid.
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: response status's code
+                example: 403
+              message:
+                type: string
+                description: error message
+                example: User is not authorized to access this resource with an explicit deny.
+    ResetAllUpdateFrequenciesRequestRequiredElectricityExport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - electricityExportUpdateFrequency
+    ResetAllUpdateFrequenciesRequestRequiredElectricityImport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - electricityImportUpdateFrequency
+    ResetAllUpdateFrequenciesRequestRequiredGasImport:
+      allOf:
+      - $ref: '#/components/schemas/ResetAllUpdateFrequenciesRequest'
+      type: object
+      required:
+      - gasUpdateFrequency
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
