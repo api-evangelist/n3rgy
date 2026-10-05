@@ -1,0 +1,12 @@
+{
+ "url": "https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml",
+ "requested_url": "https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml",
+ "status": 200,
+ "content_type": "application/yaml",
+ "bytes": 85443,
+ "sha256": "711a2900dcad51115890d0488b98f694e687fe64419628b41486619a2dbcb32b",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}
