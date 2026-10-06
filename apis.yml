@@ -57,7 +57,7 @@ tags:
 - Metering
 - Energy Data
 created: '2026-07-27'
-modified: '2026-07-27'
+modified: '2026-10-06'
 specificationVersion: '0.23'
 apis:
 - aid: n3rgy:n3rgy-create-export-profiles-api
@@ -661,6 +661,8 @@ apis:
   - type: ToolCrosswalk
     url: mcp/n3rgy-tool-crosswalk.yml
 common:
+- url: https://www.n3rgy.com/feed/
+  type: BlogRSS
 - type: CapabilityMap
   url: capabilities/n3rgy-capability-edges.yml
   name: n3rgy Business Capability Map
