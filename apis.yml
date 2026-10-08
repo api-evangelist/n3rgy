@@ -661,6 +661,8 @@ apis:
   - type: ToolCrosswalk
     url: mcp/n3rgy-tool-crosswalk.yml
 common:
+- type: RateLimits
+  url: rate-limits/n3rgy-rate-limits.yml
 - url: https://www.n3rgy.com/feed/
   type: BlogRSS
 - type: CapabilityMap
