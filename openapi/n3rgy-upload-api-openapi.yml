@@ -470,10 +470,6 @@ paths:
       - Upload
 components:
   schemas:
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
     BadRequestErrorDto:
       description: Represents the Bad Request error element.
       type: object
@@ -512,6 +508,14 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
+    BadRequestResponse:
+      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ListBadRequestDto'
+          - description: List of errors.
     MeteredValues:
       type: object
       required:
@@ -567,6 +571,10 @@ components:
           - FORWARD
           - LAGGING
           example: TOTAL
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
     UploadDevice:
       type: object
       required:
@@ -643,14 +651,6 @@ components:
           description: This identifies the SMSO managing the meter. In order to protect the data.n3rgy automated reads from existing SMSOs (Secure, DCC) these values will be forbidden when importing devices through the GUA interface. Thus any values not in ('Secure', 'DCC') will be allowed.
           type: string
           example: AMR
-    BadRequestResponse:
-      description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ListBadRequestDto'
-          - description: List of errors.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

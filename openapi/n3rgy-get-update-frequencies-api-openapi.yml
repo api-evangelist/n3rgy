@@ -60,10 +60,18 @@ paths:
       - Get Update Frequencies
 components:
   schemas:
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
+    BadRequestErrorDto:
+      description: Represents the Bad Request error element.
+      type: object
+      properties:
+        code:
+          format: int32
+          description: HTTP status code.
+          type: integer
+          example: 400
+        message:
+          description: Error message.
+          type: string
     RetrieveDataUpdateFrequenciesSuccessResponse:
       type: object
       properties:
@@ -106,18 +114,6 @@ components:
                       type: string
                       description: The update frequency for the update type
                       example: 24h
-    BadRequestErrorDto:
-      description: Represents the Bad Request error element.
-      type: object
-      properties:
-        code:
-          format: int32
-          description: HTTP status code.
-          type: integer
-          example: 400
-        message:
-          description: Error message.
-          type: string
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -135,6 +131,14 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
+    ConsentNotFoundResponse:
+      description: Response when the Consent was not found for the given MPxN.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ConsentNotFoundError'
+          - description: List of errors.
     ConsentNotFoundError:
       description: Consent Not Found error.
       type: array
@@ -149,14 +153,6 @@ components:
             description: Error message.
             type: string
             example: Consent for the given MPxN not found.
-    ConsentNotFoundResponse:
-      description: Response when the Consent was not found for the given MPxN.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ConsentNotFoundError'
-          - description: List of errors.
     BadRequestResponse:
       description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
       type: object
@@ -165,6 +161,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/ListBadRequestDto'
           - description: List of errors.
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

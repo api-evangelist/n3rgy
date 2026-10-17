@@ -142,14 +142,14 @@ paths:
       - Find Mpxn
 components:
   schemas:
-    ParamMPxNErrorResponse:
-      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+    MPxNNotAssociatedWithAHANError:
+      description: Mpxn not associated with any HAN.
       type: object
       properties:
         message:
           description: Error message.
           type: string
-          example: An MPxN must be provided, and must be a value between 1 and 13 digits.
+          example: The received MPxN is associated with a device that is not associated to any premises.
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -167,6 +167,28 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
+    ParamMPxNErrorResponse:
+      description: Response for the Customer Service Api V2 HTTP Bad Request error.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: An MPxN must be provided, and must be a value between 1 and 13 digits.
+    NotFoundMpxnError:
+      description: Mpxn Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 404.
+            format: int32
+            type: integer
+            example: 404
+          message:
+            description: Error message.
+            type: string
+            example: There is no available information of meters associated with the received MPxN.
     RetrieveMPxNAvailabilitySuccessResponse:
       type: object
       properties:
@@ -229,28 +251,6 @@ components:
               type: string
               maxLength: 30
               example: Someones street,7H,York
-    MPxNNotAssociatedWithAHANError:
-      description: Mpxn not associated with any HAN.
-      type: object
-      properties:
-        message:
-          description: Error message.
-          type: string
-          example: The received MPxN is associated with a device that is not associated to any premises.
-    NotFoundMpxnError:
-      description: Mpxn Not Found error.
-      type: array
-      items:
-        properties:
-          code:
-            description: Error code - 404.
-            format: int32
-            type: integer
-            example: 404
-          message:
-            description: Error message.
-            type: string
-            example: There is no available information of meters associated with the received MPxN.
     NotFoundMpxnResponse:
       description: Response when the MPxN was not found or not associated with a HAN.
       type: object

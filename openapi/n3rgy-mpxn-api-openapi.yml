@@ -235,10 +235,6 @@ paths:
       - Mpxn
 components:
   schemas:
-    ListBadRequestDto:
-      type: array
-      items:
-        $ref: '#/components/schemas/BadRequestErrorDto'
     BadRequestErrorDto:
       description: Represents the Bad Request error element.
       type: object
@@ -352,6 +348,14 @@ components:
                       - FORWARD
                       - LAGGING
                       example: TOTAL
+    MPxNNotAssociatedWithAHANError:
+      description: Mpxn not associated with any HAN.
+      type: object
+      properties:
+        message:
+          description: Error message.
+          type: string
+          example: The received MPxN is associated with a device that is not associated to any premises.
     ForbiddenResponse:
       description: AWS authentication invalid.
       type: object
@@ -369,53 +373,6 @@ components:
                 type: string
                 description: error message
                 example: User is not authorized to access this resource with an explicit deny.
-    MPxNNotAssociatedWithAHANError:
-      description: Mpxn not associated with any HAN.
-      type: object
-      properties:
-        message:
-          description: Error message.
-          type: string
-          example: The received MPxN is associated with a device that is not associated to any premises.
-    ConsentNotFoundError:
-      description: Consent Not Found error.
-      type: array
-      items:
-        properties:
-          code:
-            description: Error code - 403.
-            format: int32
-            type: integer
-            example: 403
-          message:
-            description: Error message.
-            type: string
-            example: Consent for the given MPxN not found.
-    RetrieveUtilitiesSuccessResponse:
-      type: object
-      properties:
-        resource:
-          description: The url resource with the MPxN
-          type: string
-          example: /mpxn/1234567891012
-        responseTimestamp:
-          description: The timestamp of the response
-          type: string
-          example: '2022-04-10T17:07:01.580Z'
-        entries:
-          description: The utilities of the han
-          type: array
-          items:
-            type: string
-          example: '[''electricity'', ''gas'']'
-    ConsentNotFoundResponse:
-      description: Response when the Consent was not found for the given MPxN.
-      type: object
-      properties:
-        errors:
-          allOf:
-          - $ref: '#/components/schemas/ConsentNotFoundError'
-          - description: List of errors.
     RetrieveReadingTypesSuccessResponse:
       type: object
       properties:
@@ -443,6 +400,28 @@ components:
                 items:
                   type: string
                 example: '[''consumption'', ''tariff'']'
+    ConsentNotFoundResponse:
+      description: Response when the Consent was not found for the given MPxN.
+      type: object
+      properties:
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/ConsentNotFoundError'
+          - description: List of errors.
+    ConsentNotFoundError:
+      description: Consent Not Found error.
+      type: array
+      items:
+        properties:
+          code:
+            description: Error code - 403.
+            format: int32
+            type: integer
+            example: 403
+          message:
+            description: Error message.
+            type: string
+            example: Consent for the given MPxN not found.
     BadRequestResponse:
       description: Response for the Whitelist/Pair CADs Api HTTP Bad Request error.
       type: object
@@ -451,6 +430,27 @@ components:
           allOf:
           - $ref: '#/components/schemas/ListBadRequestDto'
           - description: List of errors.
+    RetrieveUtilitiesSuccessResponse:
+      type: object
+      properties:
+        resource:
+          description: The url resource with the MPxN
+          type: string
+          example: /mpxn/1234567891012
+        responseTimestamp:
+          description: The timestamp of the response
+          type: string
+          example: '2022-04-10T17:07:01.580Z'
+        entries:
+          description: The utilities of the han
+          type: array
+          items:
+            type: string
+          example: '[''electricity'', ''gas'']'
+    ListBadRequestDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/BadRequestErrorDto'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
