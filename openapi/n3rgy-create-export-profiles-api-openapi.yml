@@ -108,3 +108,9 @@ components:
       in: header
       name: x-api-key
       x-amazon-apigateway-api-key-source: HEADER
+x-provenance:
+  method: harvested
+  publisher: n3rgy
+  source: https://customer-api-user-manuals.data.n3rgy.com/api-specification/customer-service-api-v2-spec-1.0.yaml
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
