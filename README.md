@@ -1,4 +1,4 @@
-# n3rgy (n3rgy)
+# n3rgy
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,73 +66,145 @@
 
 n3rgy data limited is a United Kingdom smart-energy data platform, registered in England (No. 11712674) and owned by Smart Metering Systems Ltd. It sits between Great Britain's mandated smart-metering infrastructure — the DCC network, SMETS2 home area networks (HANs), and the ESME/GSME electricity and gas meters behind them — and the organisations that want to read from it, letting a business collect consumption, production, and tariff data for a property (addressed by MPAN/MPRN, collectively MPxN) once the occupant has granted consent, without that business having to become a DCC user in its own right. Its API posture is public in documentation and closed in access: a genuinely anonymous MkDocs developer guide and a complete OpenAPI 3.0.1 contract for the Customer Service API V2 are served to anyone, while every operation is x-api-key gated and live keys must be enabled by the n3rgy back office after a business sign-up. Britain mandated the metering infrastructure, not a consumer data right, so nothing here is a Consumer Data Right or Green Button implementation — n3rgy publishes no open grid or market data at all, and the formerly public consumer API is, by the company's own statement, no longer available.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/n3rgy/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/n3rgy/refs/heads/main/apis.yml)
+**Areas:** Energy · United Kingdom · Utilities · Smart Metering · Electricity · Gas · Smart Meter Data · Consent · Metering · Energy Data
 
-## Tags
+## n3rgy on APIs.io
 
-- Energy
-- United Kingdom
-- Utilities
-- Smart Metering
-- Electricity
-- Gas
-- Smart Meter Data
-- Consent
-- Metering
-- Energy Data
+Everything profiled for n3rgy is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/n3rgy/](https://apis.io/providers/n3rgy/)** — or go straight to one of the APIs or properties below.
 
-## Timestamps
+### APIs (13)
 
-- **Created:** 2026-07-27
-- **Modified:** 2026-07-27
+- [n3rgy Create Export Profiles API](https://apis.io/apis/n3rgy/n3rgy-create-export-profiles-api/) — The Create Export Profiles API from n3rgy — 1 operation(s) for create export profiles.
+- [n3rgy Customer Service API V2 API](https://apis.io/apis/n3rgy/n3rgy-customer-service-api-v2-api/) — The Customer Service API V2 API from n3rgy — 1 operation(s) for customer service api v2.
+- [n3rgy Find Mpxn API](https://apis.io/apis/n3rgy/n3rgy-find-mpxn-api/) — The Find Mpxn API from n3rgy — 2 operation(s) for find mpxn.
+- [n3rgy Get Update Frequencies API](https://apis.io/apis/n3rgy/n3rgy-get-update-frequencies-api/) — The Get Update Frequencies API from n3rgy — 1 operation(s) for get update frequencies.
+- [n3rgy Internal API](https://apis.io/apis/n3rgy/n3rgy-internal-api/) — The Internal API from n3rgy — 1 operation(s) for internal.
+- [n3rgy Mpxn API](https://apis.io/apis/n3rgy/n3rgy-mpxn-api/) — The Mpxn API from n3rgy — 3 operation(s) for mpxn.
+- [n3rgy Push API](https://apis.io/apis/n3rgy/n3rgy-push-api/) — The Push API from n3rgy — 2 operation(s) for push.
+- [n3rgy Read Inventory API](https://apis.io/apis/n3rgy/n3rgy-read-inventory-api/) — The Read Inventory API from n3rgy — 1 operation(s) for read inventory.
+- [n3rgy Reset All Update Frequencies API](https://apis.io/apis/n3rgy/n3rgy-reset-all-update-frequencies-api/) — The Reset All Update Frequencies API from n3rgy — 1 operation(s) for reset all update frequencies.
+- [n3rgy Set Defaults API](https://apis.io/apis/n3rgy/n3rgy-set-defaults-api/) — The Set Defaults API from n3rgy — 1 operation(s) for set defaults.
+- [n3rgy Set Meter Update Frequency API](https://apis.io/apis/n3rgy/n3rgy-set-meter-update-frequency-api/) — The Set Meter Update Frequency API from n3rgy — 1 operation(s) for set meter update frequency.
+- [n3rgy Update Now API](https://apis.io/apis/n3rgy/n3rgy-update-now-api/) — The Update Now API from n3rgy — 1 operation(s) for update now.
+- [n3rgy Upload API](https://apis.io/apis/n3rgy/n3rgy-upload-api/) — The Upload API from n3rgy — 4 operation(s) for upload.
 
-## APIs
+### Published properties
 
-### n3rgy Customer Service API V2
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-The consent-scoped smart-meter data API of the n3rgy platform. A business holding a valid n3rgy API key lists the properties (MPxNs) it has active consent for, discovers which utilities (electricity, gas) and reading types (consumption, production, tariff) are available for each, and retrieves the underlying half-hourly data. The same contract also covers meter update-frequency control, MPxN and address lookup, read-inventory / firmware and last-communications checks, on-demand "update now" fetches, push-notification configuration, and an upload/devices surface for non-DCC device data. Every operation is secured with the x-api-key header; consent-bearing operations additionally validate that an active consent exists for the HAN behind the given MPxN. A free sandbox with demonstration MPxNs mirrors the live contract on a separate host.
+#### AsyncAPI (1)
 
-- **Human URL:** [https://customer-api-user-manuals.data.n3rgy.com/](https://customer-api-user-manuals.data.n3rgy.com/)
-- **Base URL:** `https://api-v2.data.n3rgy.com`
-- **Sandbox Base URL:** `https://api-v2-sandbox.data.n3rgy.com`
+Event-driven and webhook contracts.
 
-#### Tags
+- [N3Rgy Push Notifications Webhooks](https://apis.io/asyncapis/n3rgy/n3rgy-push-notifications-webhooks/)
 
-- Smart Metering
-- Consumption
-- Tariff
-- Consent
-- Electricity
-- Gas
+#### MCP servers (1)
 
-#### Properties
+Model Context Protocol servers that expose the API to agents.
 
-- [OpenAPI](openapi/n3rgy-customer-service-api-v2-openapi.yaml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://customer-api-user-manuals.data.n3rgy.com/)
-- [API Reference](https://customer-api-user-manuals.data.n3rgy.com/api-specification/)
-- [Authentication](https://customer-api-user-manuals.data.n3rgy.com/authentication/)
-- [Requests](https://customer-api-user-manuals.data.n3rgy.com/requests/)
-- [Schemas](https://customer-api-user-manuals.data.n3rgy.com/schemas/)
-- [Sandbox](https://customer-api-user-manuals.data.n3rgy.com/sandbox-requests/)
-- [Electricity Data Items](https://customer-api-user-manuals.data.n3rgy.com/electricity-format/)
-- [Gas Data Items](https://customer-api-user-manuals.data.n3rgy.com/gas-format/)
-- [Change Log](https://customer-api-user-manuals.data.n3rgy.com/change-log/)
-- [Sign Up](https://data.n3rgy.com/business-sign-up)
+- [n3rgy](https://apis.io/servers/n3rgy/n3rgy/)
 
-## Common Properties
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [N3Rgy Agentic Access](https://apis.io/agentic-access/n3rgy/n3rgy-agentic-access/)
+
+#### Examples (7)
+
+Example requests and responses.
+
+- [N3Rgy Error Bad Request Example](https://apis.io/examples/n3rgy/n3rgy-error-bad-request-example/)
+- [N3Rgy Error Forbidden Example](https://apis.io/examples/n3rgy/n3rgy-error-forbidden-example/)
+- [N3Rgy Push Configuration Request Example](https://apis.io/examples/n3rgy/n3rgy-push-configuration-request-example/)
+- [N3Rgy Push Configuration Response Example](https://apis.io/examples/n3rgy/n3rgy-push-configuration-response-example/)
+- [N3Rgy Push Status Response Example](https://apis.io/examples/n3rgy/n3rgy-push-status-response-example/)
+- [N3Rgy Retrieve Consented Mpxns Empty Example](https://apis.io/examples/n3rgy/n3rgy-retrieve-consented-mpxns-empty-example/)
+- [N3Rgy Retrieve Consented Mpxns Example](https://apis.io/examples/n3rgy/n3rgy-retrieve-consented-mpxns-example/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [N3Rgy Customer Service Api V2 Overlay](https://apis.io/overlays/n3rgy/n3rgy-customer-service-api-v2-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [N3Rgy Authentication](https://apis.io/security/n3rgy/n3rgy-authentication/)
+- [N3Rgy Domain Security](https://apis.io/security/n3rgy/n3rgy-domain-security/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [N3Rgy Rate Limits](https://apis.io/rate-limits/n3rgy/n3rgy-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://www.n3rgy.com/)
 - [Documentation](https://customer-api-user-manuals.data.n3rgy.com/)
-- [Sign Up](https://data.n3rgy.com/business-sign-up)
-- [Login](https://www.n3rgy.com/business-login/)
-- [Consumer Portal](https://data.n3rgy.com/consumer-login)
 - [Pricing](https://www.n3rgy.com/business/)
-- [Terms of Service](https://www.n3rgy.com/wp-content/uploads/2023/04/N3rgyDataLimited.pdf)
-- [Privacy Policy](https://www.n3rgy.com/privacy/)
+- [Sign up](https://data.n3rgy.com/business-sign-up)
 - [Support](https://www.n3rgy.com/contact-us/)
-- [About](https://www.n3rgy.com/about-us/)
-- [GitHub Organization](https://github.com/n3rgy)
+- [Terms of service](https://www.n3rgy.com/wp-content/uploads/2023/04/N3rgyDataLimited.pdf)
+- [Privacy policy](https://www.n3rgy.com/privacy/)
+- [GitHub](https://github.com/n3rgy)
 
-## Maintainers
+## API Evangelist rating
 
-- Kin Lane — kin@apievangelist.com
+**Kin Score 47.0** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 66.1 |
+| Contract quality | 59.4 |
+| Contract governance | 4.5 |
+| Operational transparency | 57.9 |
+| Developer ergonomics | 35.1 |
+| Access clarity | 38.2 |
+
+**Agent readiness 35.2** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | partial |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 36.9** — Energy & Utilities
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/n3rgy/](https://apis.io/providers/n3rgy/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for n3rgy: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/n3rgy/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
